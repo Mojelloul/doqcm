@@ -15,6 +15,7 @@ export default function AnalysisResultPage() {
           <CardTitle>Prompt envoyé</CardTitle>
         </CardHeader>
         <CardContent>
+          
           <pre className="whitespace-pre-wrap bg-muted p-4 rounded-lg">
             {prompt}
           </pre>
