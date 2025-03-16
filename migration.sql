@@ -117,4 +117,31 @@ CREATE POLICY "Admins can read all employee documents" ON employees_documents
         auth.uid() IN (
             SELECT id FROM users WHERE role = 'admin'
         )
-    ); 
+    );
+
+-- Create users_questions table
+CREATE TABLE users_questions (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    question_id UUID REFERENCES qcm_questions(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+    UNIQUE(user_id, question_id)
+);
+
+-- Add RLS (Row Level Security) policies
+ALTER TABLE users_questions ENABLE ROW LEVEL SECURITY;
+
+-- Policy to allow users to see their own questions
+CREATE POLICY "Users can view their own questions"
+    ON users_questions
+    FOR SELECT
+    USING (auth.uid() = user_id);
+
+-- Policy to allow inserting questions for authenticated users
+CREATE POLICY "Users can insert questions"
+    ON users_questions
+    FOR INSERT
+    WITH CHECK (auth.role() = 'authenticated');
+
+-- Grant necessary permissions
+GRANT ALL ON users_questions TO authenticated; 

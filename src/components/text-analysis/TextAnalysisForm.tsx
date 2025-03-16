@@ -188,7 +188,7 @@ summary:
       if (documentError) throw documentError;
       if (!document) throw new Error("Erreur lors de la création du document");
 
-      // Vérifier les utilisateurs et créer les partages
+      // Vérifier les utilisateurs
       const { data: sharedUsers, error: usersError } = await supabase
         .rpc('check_users_exist', { user_emails: emails });
 
@@ -213,38 +213,50 @@ summary:
 
       if (sharingError) throw sharingError;
 
-      // Sauvegarder les questions et les choix pour chaque utilisateur
-      for (const user of sharedUsers) {
-        // Pour chaque question du QCM
-        for (const qcmQuestion of result.qcm) {
-          // Créer la question
-          const { data: questionData, error: questionError } = await supabase
-            .from("qcm_questions")
-            .insert([
-              {
-                document_id: document.id,
-                question: qcmQuestion.question
-              }
-            ])
-            .select()
-            .single();
+      // Sauvegarder les questions une seule fois
+      const questionsData = [];
+      const usersQuestionsData = [];
+      
+      for (const qcmQuestion of result.qcm) {
+        // Créer la question
+        const { data: questionData, error: questionError } = await supabase
+          .from("qcm_questions")
+          .insert([
+            {
+              document_id: document.id,
+              question: qcmQuestion.question
+            }
+          ])
+          .select()
+          .single();
 
-          if (questionError) throw questionError;
-          if (!questionData) throw new Error("Erreur lors de la création de la question");
+        if (questionError) throw questionError;
+        if (!questionData) throw new Error("Erreur lors de la création de la question");
 
-          // Créer les choix pour cette question
-          const choicesData = Object.entries(qcmQuestion.choices).map(([key, value]) => ({
-            question_id: questionData.id,
-            choice: value,
-            is_correct: key === qcmQuestion.correct_answer
-          }));
+        // Créer les choix pour cette question
+        const choicesData = Object.entries(qcmQuestion.choices).map(([key, value]) => ({
+          question_id: questionData.id,
+          choice: value,
+          is_correct: key === qcmQuestion.correct_answer
+        }));
 
-          const { error: choicesError } = await supabase
-            .from("qcm_choices")
-            .insert(choicesData);
+        const { error: choicesError } = await supabase
+          .from("qcm_choices")
+          .insert(choicesData);
 
-          if (choicesError) throw choicesError;
-        }
+        if (choicesError) throw choicesError;
+
+        // Créer les liens utilisateurs-questions
+        const userQuestionLinks = sharedUsers.map((user: { id: string }) => ({
+          user_id: user.id,
+          question_id: questionData.id
+        }));
+
+        const { error: userQuestionsError } = await supabase
+          .from("users_questions")
+          .insert(userQuestionLinks);
+
+        if (userQuestionsError) throw userQuestionsError;
       }
 
       form.reset();
