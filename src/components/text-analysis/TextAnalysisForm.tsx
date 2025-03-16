@@ -4,7 +4,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { X } from "lucide-react";
+import { X, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { gemini } from "@/lib/gemini";
 
@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
 import { Badge } from "@/components/ui/badge";
 
@@ -188,7 +188,7 @@ summary:
       if (documentError) throw documentError;
       if (!document) throw new Error("Erreur lors de la création du document");
 
-      // Vérifier les utilisateurs
+      // Vérifier les utilisateurs et créer les partages
       const { data: sharedUsers, error: usersError } = await supabase
         .rpc('check_users_exist', { user_emails: emails });
 
@@ -213,50 +213,38 @@ summary:
 
       if (sharingError) throw sharingError;
 
-      // Sauvegarder les questions une seule fois
-      const questionsData = [];
-      const usersQuestionsData = [];
-      
-      for (const qcmQuestion of result.qcm) {
-        // Créer la question
-        const { data: questionData, error: questionError } = await supabase
-          .from("qcm_questions")
-          .insert([
-            {
-              document_id: document.id,
-              question: qcmQuestion.question
-            }
-          ])
-          .select()
-          .single();
+      // Sauvegarder les questions et les choix pour chaque utilisateur
+      for (const user of sharedUsers) {
+        // Pour chaque question du QCM
+        for (const qcmQuestion of result.qcm) {
+          // Créer la question
+          const { data: questionData, error: questionError } = await supabase
+            .from("qcm_questions")
+            .insert([
+              {
+                document_id: document.id,
+                question: qcmQuestion.question
+              }
+            ])
+            .select()
+            .single();
 
-        if (questionError) throw questionError;
-        if (!questionData) throw new Error("Erreur lors de la création de la question");
+          if (questionError) throw questionError;
+          if (!questionData) throw new Error("Erreur lors de la création de la question");
 
-        // Créer les choix pour cette question
-        const choicesData = Object.entries(qcmQuestion.choices).map(([key, value]) => ({
-          question_id: questionData.id,
-          choice: value,
-          is_correct: key === qcmQuestion.correct_answer
-        }));
+          // Créer les choix pour cette question
+          const choicesData = Object.entries(qcmQuestion.choices).map(([key, value]) => ({
+            question_id: questionData.id,
+            choice: value,
+            is_correct: key === qcmQuestion.correct_answer
+          }));
 
-        const { error: choicesError } = await supabase
-          .from("qcm_choices")
-          .insert(choicesData);
+          const { error: choicesError } = await supabase
+            .from("qcm_choices")
+            .insert(choicesData);
 
-        if (choicesError) throw choicesError;
-
-        // Créer les liens utilisateurs-questions
-        const userQuestionLinks = sharedUsers.map((user: { id: string }) => ({
-          user_id: user.id,
-          question_id: questionData.id
-        }));
-
-        const { error: userQuestionsError } = await supabase
-          .from("users_questions")
-          .insert(userQuestionLinks);
-
-        if (userQuestionsError) throw userQuestionsError;
+          if (choicesError) throw choicesError;
+        }
       }
 
       form.reset();
@@ -280,8 +268,16 @@ summary:
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle>Analyse de Texte</CardTitle>
+        <Button
+          variant="outline"
+          onClick={() => router.push('/documents')}
+          className="flex items-center gap-2"
+        >
+          <FileText className="h-4 w-4" />
+          Mes Documents
+        </Button>
       </CardHeader>
       <CardContent>
         <Form {...form}>
