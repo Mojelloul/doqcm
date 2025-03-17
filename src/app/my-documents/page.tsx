@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, ArrowLeft, Calendar } from "lucide-react";
+import { FileText, Calendar, Plus, Users, BarChart } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -21,9 +21,10 @@ interface Document {
   content: string;
   summary: string;
   created_at: string;
+  shared_count?: number;
 }
 
-export default function DocumentsPage() {
+export default function MyDocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { supabase } = useSupabaseContext();
@@ -39,11 +40,11 @@ export default function DocumentsPage() {
           return;
         }
 
-        // Récupérer les documents partagés avec l'utilisateur
+        // Récupérer les documents créés par l'utilisateur
         const { data, error } = await supabase
           .from('documents')
-          .select('*, employees_documents!inner(document_id, employee_id)')
-          .eq('employees_documents.employee_id', userData.user.id)
+          .select('*, employees_documents(document_id)')
+          .eq('owner_id', userData.user.id)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -54,7 +55,8 @@ export default function DocumentsPage() {
           title: item.title,
           content: item.content,
           summary: item.summary,
-          created_at: item.created_at
+          created_at: item.created_at,
+          shared_count: item.employees_documents ? item.employees_documents.length : 0
         })) : [];
         
         setDocuments(formattedData);
@@ -71,7 +73,14 @@ export default function DocumentsPage() {
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Mes Documents Partagés</h1>
+        <h1 className="text-2xl font-bold">Mes Documents Créés</h1>
+        <Button
+          onClick={() => router.push('/dashboard')}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Créer un document
+        </Button>
       </div>
 
       {isLoading ? (
@@ -80,15 +89,15 @@ export default function DocumentsPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-8">
             <FileText className="h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-lg font-medium text-gray-900">Aucun document partagé trouvé</p>
+            <p className="text-lg font-medium text-gray-900">Aucun document créé</p>
             <p className="text-sm text-gray-500 mt-1">
-              Vous n'avez pas encore de documents partagés avec vous
+              Vous n'avez pas encore créé de documents
             </p>
             <Button
               onClick={() => router.push('/dashboard')}
               className="mt-4"
             >
-              Créer une analyse
+              Créer un document
             </Button>
           </CardContent>
         </Card>
@@ -107,13 +116,21 @@ export default function DocumentsPage() {
                 <p className="text-sm text-gray-500 line-clamp-3 mb-4">
                   {doc.summary || doc.content.substring(0, 150) + "..."}
                 </p>
-                <Button
-                  variant="outline"
-                  className="w-full mt-4"
-                  onClick={() => router.push(`/documents/qcm/${doc.id}`)}
-                >
-                  Voir le test QCM
-                </Button>
+                <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Users className="h-4 w-4 mr-1" />
+                    <span>Partagé avec {doc.shared_count} utilisateur{doc.shared_count !== 1 ? 's' : ''}</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push(`/document-results/${doc.id}`)}
+                    className="flex items-center gap-1"
+                  >
+                    <BarChart className="h-4 w-4" />
+                    Résultats
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
