@@ -348,172 +348,189 @@ export default function DocumentQCMPage() {
         </Card>
       ) : (
         <>
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>{document.title}</CardTitle>
-              <CardDescription className="flex items-center gap-2">
+          <Card className="mb-8 shadow-md">
+            <CardHeader className="border-b bg-gray-50">
+              <CardTitle className="text-xl text-blue-800">{document.title}</CardTitle>
+              <CardDescription className="flex items-center gap-2 text-gray-600">
                 Créé le {format(new Date(document.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-700 mb-4">
-                {document.summary || document.content.substring(0, 200) + "..."}
-              </p>
+            <CardContent className="pt-6">
+              {document.summary && (
+                <div className="mb-6 bg-blue-50 p-4 rounded-md border border-blue-100">
+                  <h3 className="text-md font-semibold text-blue-800 mb-2">points importants</h3>
+                  <p className="text-gray-700 italic">{document.summary}</p>
+                </div>
+              )}
+              <div className="mt-4">
+                <h3 className="text-md font-semibold text-gray-800 mb-2">Contenu du document</h3>
+                <div className="prose max-w-none">
+                  {document.content.split('\n').map((paragraph, index) => (
+                    paragraph.trim() ? (
+                      <p key={index} className="mb-4 text-gray-700 leading-relaxed">
+                        {paragraph}
+                      </p>
+                    ) : null
+                  ))}
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <h2 className="text-xl font-semibold mb-4">Questions du QCM</h2>
+          <div className="border-t border-gray-200 my-8 pt-8">
+            <h2 className="text-xl font-semibold mb-4 text-blue-800">Questions du QCM</h2>
 
-          {questions.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-8">
-                <HelpCircle className="h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-lg font-medium text-gray-900">Aucune question trouvée</p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Ce document n'a pas encore de questions QCM associées
-                </p>
-              </CardContent>
-            </Card>
-          ) : hasExistingScore ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-8">
-                <div className="text-center">
-                  <p className="text-lg font-medium text-gray-900 mb-4">Vous avez déjà complété ce QCM</p>
-                  <p className="text-sm text-gray-500 mb-6">
-                    Votre score: {score.percentage.toFixed(2)}%
+            {questions.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-8">
+                  <HelpCircle className="h-12 w-12 text-gray-400 mb-4" />
+                  <p className="text-lg font-medium text-gray-900">Aucune question trouvée</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Ce document n'a pas encore de questions QCM associées
                   </p>
-                  <div className="w-full max-w-md mx-auto bg-gray-200 rounded-full h-4 mb-6">
-                    <div 
-                      className={`h-4 rounded-full ${
-                        score.percentage >= 80 ? 'bg-green-500' : 
-                        score.percentage >= 50 ? 'bg-yellow-500' : 
-                        'bg-red-500'
-                      }`} 
-                      style={{ width: `${score.percentage}%` }}
-                    ></div>
+                </CardContent>
+              </Card>
+            ) : hasExistingScore ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-8">
+                  <div className="text-center">
+                    <p className="text-lg font-medium text-gray-900 mb-4">Vous avez déjà complété ce QCM</p>
+                    <p className="text-sm text-gray-500 mb-6">
+                      Votre score: {score.percentage.toFixed(2)}%
+                    </p>
+                    <div className="w-full max-w-md mx-auto bg-gray-200 rounded-full h-4 mb-6">
+                      <div 
+                        className={`h-4 rounded-full ${
+                          score.percentage >= 80 ? 'bg-green-500' : 
+                          score.percentage >= 50 ? 'bg-yellow-500' : 
+                          'bg-red-500'
+                        }`} 
+                        style={{ width: `${score.percentage}%` }}
+                      ></div>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      className="mx-auto"
+                      onClick={() => router.push('/documents')}
+                    >
+                      Retour à mes documents
+                    </Button>
                   </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-6">
+                {questions.map((question, index) => (
+                  <Card key={question.id}>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Question {index + 1}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="font-medium mb-4">{question.question}</p>
+                      <div className="space-y-2">
+                        {questionChoices[question.id] && questionChoices[question.id].map((choice, choiceIndex) => (
+                          <div 
+                            key={choice.id} 
+                            className={getChoiceClassName(question.id, choice.id)}
+                            onClick={() => handleAnswerSelect(question.id, choice.id)}
+                          >
+                            <input 
+                              type="radio" 
+                              name={`question-${question.id}`} 
+                              id={`choice-${choice.id}`} 
+                              className="h-5 w-5 text-blue-600"
+                              checked={selectedAnswers[question.id] === choice.id}
+                              onChange={() => {}}
+                            />
+                            <label 
+                              htmlFor={`choice-${choice.id}`} 
+                              className="flex-grow cursor-pointer"
+                            >
+                              <span className="block text-base font-medium text-gray-800">
+                                <span className="inline-block w-6 text-center mr-2 text-gray-500">{choiceIndex + 1}.</span>
+                                {choice.choice}
+                              </span>
+                            </label>
+                          </div>
+                        ))}
+                        
+                        {(!questionChoices[question.id] || questionChoices[question.id].length === 0) && (
+                          <p className="text-sm text-gray-500 italic">Aucun choix disponible pour cette question</p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+
+                <div className="flex justify-end mt-6 gap-4">
+                  {showResults && !hasExistingScore ? (
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setSelectedAnswers({});
+                        setShowResults(false);
+                      }}
+                    >
+                      Réessayer
+                    </Button>
+                  ) : !hasExistingScore ? (
+                    <Button onClick={handleSubmit}>
+                      Soumettre les réponses
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+            )}
+
+            {showResults && !hasExistingScore && (
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>Résultats du QCM</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-medium">Score:</span>
+                      <span className="text-lg font-bold">{score.correct}/{score.total} ({score.percentage.toFixed(2)}%)</span>
+                    </div>
+                    
+                    <div className="w-full bg-gray-200 rounded-full h-4">
+                      <div 
+                        className={`h-4 rounded-full ${
+                          score.percentage >= 80 ? 'bg-green-500' : 
+                          score.percentage >= 50 ? 'bg-yellow-500' : 
+                          'bg-red-500'
+                        }`} 
+                        style={{ width: `${score.percentage}%` }}
+                      ></div>
+                    </div>
+                    
+                    <div className="pt-4 border-t">
+                      <p className="text-sm text-gray-600 mb-2">
+                        {score.percentage >= 80 
+                          ? "Excellent travail ! Vous avez une très bonne compréhension du sujet." 
+                          : score.percentage >= 50 
+                          ? "Bon travail ! Vous avez une compréhension correcte du sujet, mais il y a encore place à l'amélioration." 
+                          : "Vous pourriez bénéficier d'une révision supplémentaire du sujet."}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Votre score a été enregistré et est visible par le créateur du document.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
                   <Button 
                     variant="outline" 
-                    className="mx-auto"
+                    className="w-full"
                     onClick={() => router.push('/documents')}
                   >
                     Retour à mes documents
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-6">
-              {questions.map((question, index) => (
-                <Card key={question.id}>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Question {index + 1}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="font-medium mb-4">{question.question}</p>
-                    <div className="space-y-2">
-                      {questionChoices[question.id] && questionChoices[question.id].map((choice, choiceIndex) => (
-                        <div 
-                          key={choice.id} 
-                          className={getChoiceClassName(question.id, choice.id)}
-                          onClick={() => handleAnswerSelect(question.id, choice.id)}
-                        >
-                          <input 
-                            type="radio" 
-                            name={`question-${question.id}`} 
-                            id={`choice-${choice.id}`} 
-                            className="h-5 w-5 text-blue-600"
-                            checked={selectedAnswers[question.id] === choice.id}
-                            onChange={() => {}}
-                          />
-                          <label 
-                            htmlFor={`choice-${choice.id}`} 
-                            className="flex-grow cursor-pointer"
-                          >
-                            <span className="block text-base font-medium text-gray-800">
-                              <span className="inline-block w-6 text-center mr-2 text-gray-500">{choiceIndex + 1}.</span>
-                              {choice.choice}
-                            </span>
-                          </label>
-                        </div>
-                      ))}
-                      
-                      {(!questionChoices[question.id] || questionChoices[question.id].length === 0) && (
-                        <p className="text-sm text-gray-500 italic">Aucun choix disponible pour cette question</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-
-              <div className="flex justify-end mt-6 gap-4">
-                {showResults && !hasExistingScore ? (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setSelectedAnswers({});
-                      setShowResults(false);
-                    }}
-                  >
-                    Réessayer
-                  </Button>
-                ) : !hasExistingScore ? (
-                  <Button onClick={handleSubmit}>
-                    Soumettre les réponses
-                  </Button>
-                ) : null}
-              </div>
-            </div>
-          )}
-
-          {showResults && !hasExistingScore && (
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>Résultats du QCM</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-medium">Score:</span>
-                    <span className="text-lg font-bold">{score.correct}/{score.total} ({score.percentage.toFixed(2)}%)</span>
-                  </div>
-                  
-                  <div className="w-full bg-gray-200 rounded-full h-4">
-                    <div 
-                      className={`h-4 rounded-full ${
-                        score.percentage >= 80 ? 'bg-green-500' : 
-                        score.percentage >= 50 ? 'bg-yellow-500' : 
-                        'bg-red-500'
-                      }`} 
-                      style={{ width: `${score.percentage}%` }}
-                    ></div>
-                  </div>
-                  
-                  <div className="pt-4 border-t">
-                    <p className="text-sm text-gray-600 mb-2">
-                      {score.percentage >= 80 
-                        ? "Excellent travail ! Vous avez une très bonne compréhension du sujet." 
-                        : score.percentage >= 50 
-                        ? "Bon travail ! Vous avez une compréhension correcte du sujet, mais il y a encore place à l'amélioration." 
-                        : "Vous pourriez bénéficier d'une révision supplémentaire du sujet."}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Votre score a été enregistré et est visible par le créateur du document.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => router.push('/documents')}
-                >
-                  Retour à mes documents
-                </Button>
-              </CardFooter>
-            </Card>
-          )}
+                </CardFooter>
+              </Card>
+            )}
+          </div>
         </>
       )}
     </div>
