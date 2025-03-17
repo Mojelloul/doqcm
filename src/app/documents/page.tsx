@@ -127,9 +127,9 @@ export default function DocumentsPage() {
                 <Button
                   variant="outline"
                   className="w-full mt-4"
-                  onClick={() => router.push(`/documents/${doc.id}`)}
+                  onClick={() => router.push(`/documents/qcm/${doc.id}`)}
                 >
-                  Voir les détails
+                  Voir le test QCM
                 </Button>
               </CardContent>
             </Card>
