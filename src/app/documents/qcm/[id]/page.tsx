@@ -12,7 +12,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileText, HelpCircle } from "lucide-react";
+import { ArrowLeft, FileText, HelpCircle, Home } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -322,11 +322,11 @@ export default function DocumentQCMPage() {
             Retour
           </Button>
           <Button
-            onClick={() => router.push('/documents')}
+            onClick={() => router.push('/dashboard')}
             className="flex items-center gap-2"
           >
-            <FileText className="h-4 w-4" />
-            Tous les documents
+            <Home className="h-4 w-4" />
+            Accueil
           </Button>
         </div>
       </div>
@@ -411,9 +411,9 @@ export default function DocumentQCMPage() {
                     <Button 
                       variant="outline" 
                       className="mx-auto"
-                      onClick={() => router.push('/documents')}
+                      onClick={() => router.push('/dashboard')}
                     >
-                      Retour à mes documents
+                      Retour à l'accueil
                     </Button>
                   </div>
                 </CardContent>
@@ -523,9 +523,9 @@ export default function DocumentQCMPage() {
                   <Button 
                     variant="outline" 
                     className="w-full"
-                    onClick={() => router.push('/documents')}
+                    onClick={() => router.push('/dashboard')}
                   >
-                    Retour à mes documents
+                    Retour à l'accueil
                   </Button>
                 </CardFooter>
               </Card>

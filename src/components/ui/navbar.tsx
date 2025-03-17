@@ -34,7 +34,7 @@ export function Navbar() {
           </Link>
           <div className="hidden md:flex space-x-2">
             <Button variant="ghost" asChild>
-              <Link href="/" className="flex items-center">
+              <Link href="/dashboard" className="flex items-center">
                 <Home className="h-4 w-4 mr-2" />
                 Accueil
               </Link>

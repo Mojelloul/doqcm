@@ -72,23 +72,6 @@ export default function DocumentsPage() {
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Mes Documents Partagés</h1>
-        <div className="flex gap-4">
-          <Button
-            variant="outline"
-            onClick={() => router.back()}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Retour
-          </Button>
-          <Button
-            onClick={() => router.push('/')}
-            className="flex items-center gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            Nouvelle Analyse
-          </Button>
-        </div>
       </div>
 
       {isLoading ? (
@@ -102,7 +85,7 @@ export default function DocumentsPage() {
               Vous n'avez pas encore de documents partagés avec vous
             </p>
             <Button
-              onClick={() => router.push('/')}
+              onClick={() => router.push('/dashboard')}
               className="mt-4"
             >
               Créer une analyse
