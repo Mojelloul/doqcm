@@ -1,21 +1,22 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function AnalysisResultPage() {
+// Composant client qui utilise useSearchParams
+function AnalysisResultContent() {
+  const { useSearchParams } = require("next/navigation");
   const searchParams = useSearchParams();
   const prompt = searchParams.get("prompt");
   const result = searchParams.get("result");
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Prompt envoyé</CardTitle>
         </CardHeader>
         <CardContent>
-          
           <pre className="whitespace-pre-wrap bg-muted p-4 rounded-lg">
             {prompt}
           </pre>
@@ -32,6 +33,17 @@ export default function AnalysisResultPage() {
           </pre>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+// Composant principal avec Suspense
+export default function AnalysisResultPage() {
+  return (
+    <div className="container mx-auto py-8">
+      <Suspense fallback={<div>Chargement des résultats...</div>}>
+        <AnalysisResultContent />
+      </Suspense>
     </div>
   );
 } 
