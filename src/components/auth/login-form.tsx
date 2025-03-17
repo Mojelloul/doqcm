@@ -47,17 +47,54 @@ export function LoginForm() {
   async function onSubmit(values: FormData) {
     try {
       setIsLoading(true);
+      setError(null);
+      console.log("Tentative de connexion avec:", values.email);
+      
+      // Connexion avec gestion des cookies
       const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
-        password: values.password,
+        password: values.password
       });
+
+      console.log("Réponse de connexion:", { data, error });
 
       if (error) {
         console.error("Erreur de connexion:", error);
         throw error;
       }
 
-      // Redirection simple vers le dashboard
+      if (!data?.user) {
+        throw new Error("Aucun utilisateur trouvé après la connexion");
+      }
+
+      // Vérifier que la session est bien établie
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error("Erreur lors de la vérification de la session:", sessionError);
+        throw sessionError;
+      }
+
+      if (!session) {
+        throw new Error("La session n'a pas été établie correctement");
+      }
+
+      // Forcer la mise à jour des cookies
+      await supabase.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token
+      });
+
+      console.log("Session établie:", {
+        user: session.user.email,
+        expires_at: session.expires_at
+      });
+      
+      // Rafraîchir le routeur pour mettre à jour l'état de la session
+      router.refresh();
+      
+      // Rediriger vers le tableau de bord
+      console.log("Connexion réussie, redirection vers /dashboard");
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Erreur de connexion:", error);
