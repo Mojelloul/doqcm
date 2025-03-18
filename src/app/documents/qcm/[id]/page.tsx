@@ -275,6 +275,7 @@ export default function DocumentQCMPage() {
         percentage
       });
       setShowResults(true);
+      setHasExistingScore(true);
       
       // Afficher un message de succès
       alert(`Votre score a été enregistré : ${correctAnswers}/${questions.length} (${percentage.toFixed(2)}%)`);
@@ -463,21 +464,9 @@ export default function DocumentQCMPage() {
                 ))}
 
                 <div className="flex justify-end mt-6 gap-4">
-                  {showResults && !hasExistingScore ? (
-                    <Button 
-                      variant="outline" 
-                      onClick={() => {
-                        setSelectedAnswers({});
-                        setShowResults(false);
-                      }}
-                    >
-                      Réessayer
-                    </Button>
-                  ) : !hasExistingScore ? (
-                    <Button onClick={handleSubmit}>
-                      Soumettre les réponses
-                    </Button>
-                  ) : null}
+                  <Button onClick={handleSubmit}>
+                    Soumettre les réponses
+                  </Button>
                 </div>
               </div>
             )}
