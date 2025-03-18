@@ -391,7 +391,7 @@ export default function DocumentQCMPage() {
                   </p>
                 </CardContent>
               </Card>
-            ) : hasExistingScore ? (
+            ) : hasExistingScore || showResults ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-8">
                   <div className="text-center">
