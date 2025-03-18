@@ -5,7 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
 import { Button } from "@/components/ui/button";
-import { LogOut, FileText, Home, Menu, X } from "lucide-react";
+import { LogOut, FileText, Home, Menu, X, User, Info } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,8 +22,16 @@ export function Navbar() {
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-      await supabase.auth.signOut();
-      router.push("/login");
+      // Vérifier si une session existe avant de se déconnecter
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        // Supprimer la session et les cookies
+        await supabase.auth.signOut();
+        // Rediriger vers la page de connexion
+        router.push("/login");
+        // Forcer un rechargement de la page pour nettoyer l'état
+        window.location.href = "/login";
+      }
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
     } finally {
@@ -56,6 +70,35 @@ export function Navbar() {
                 Mes Créations
               </Link>
             </Button>
+            <Button variant="ghost" asChild>
+              <Link href="/account" className="flex items-center">
+                <User className="h-4 w-4 mr-2" />
+                Mon Compte
+              </Link>
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center">
+                  <Info className="h-4 w-4 mr-2" />
+                  Informations
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href="/privacy" className="flex items-center w-full">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Politique de confidentialité
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/legal" className="flex items-center w-full">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Mentions légales
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         
@@ -110,6 +153,24 @@ export function Navbar() {
               <Link href="/my-documents" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 <FileText className="h-4 w-4 mr-2" />
                 Mes Créations
+              </Link>
+            </Button>
+            <Button variant="ghost" asChild className="justify-start">
+              <Link href="/account" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
+                <User className="h-4 w-4 mr-2" />
+                Mon Compte
+              </Link>
+            </Button>
+            <Button variant="ghost" asChild className="justify-start">
+              <Link href="/privacy" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
+                <FileText className="h-4 w-4 mr-2" />
+                Politique de confidentialité
+              </Link>
+            </Button>
+            <Button variant="ghost" asChild className="justify-start">
+              <Link href="/legal" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
+                <FileText className="h-4 w-4 mr-2" />
+                Mentions légales
               </Link>
             </Button>
             <Button 

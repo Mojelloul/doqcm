@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SupabaseProvider } from "@/lib/context/SupabaseProvider";
 import "./globals.css";
 import { Navbar } from "@/components/ui/navbar";
+import { CookieConsent } from "@/components/ui/CookieConsent";
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,12 +28,28 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}>
         <SupabaseProvider>
           <Navbar />
-          <main className="min-h-screen py-8">
+          <main className="flex-grow py-8">
             {children}
           </main>
+          <footer className="border-t py-6 bg-muted/20">
+            <div className="container mx-auto px-4 flex flex-col sm:flex-row justify-between items-center">
+              <div className="text-sm text-muted-foreground mb-4 sm:mb-0">
+                © {new Date().getFullYear()} DoQCM. Tous droits réservés.
+              </div>
+              <div className="flex space-x-4 text-sm text-muted-foreground">
+                <Link href="/privacy" className="hover:underline">
+                  Politique de confidentialité
+                </Link>
+                <Link href="/legal" className="hover:underline">
+                  Mentions légales
+                </Link>
+              </div>
+            </div>
+          </footer>
+          <CookieConsent />
         </SupabaseProvider>
       </body>
     </html>

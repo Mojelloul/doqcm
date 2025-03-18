@@ -14,11 +14,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -30,6 +32,9 @@ const formSchema = z.object({
   name: z.string().min(2, {
     message: "Le nom doit contenir au moins 2 caractères.",
   }),
+  privacyConsent: z.boolean().refine(value => value === true, {
+    message: "Vous devez accepter la politique de confidentialité pour créer un compte."
+  })
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -46,6 +51,7 @@ export function RegisterForm() {
       email: "",
       password: "",
       name: "",
+      privacyConsent: false
     },
   });
 
@@ -177,6 +183,29 @@ export function RegisterForm() {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="privacyConsent"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      J'accepte la <a href="/privacy" className="underline" target="_blank">politique de confidentialité</a>
+                    </FormLabel>
+                    <FormDescription>
+                      En cochant cette case, vous acceptez que vos données soient traitées conformément à notre politique de confidentialité.
+                    </FormDescription>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}

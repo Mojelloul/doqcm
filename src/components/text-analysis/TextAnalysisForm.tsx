@@ -4,7 +4,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { X, FileText } from "lucide-react";
+import { X, FileText, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { gemini } from "@/lib/gemini";
 
@@ -23,6 +23,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   title: z.string().min(1, {
@@ -37,6 +39,9 @@ const formSchema = z.object({
     message: "Le résumé ne doit pas dépasser 250 caractères.",
   }),
   emailInput: z.string().optional(),
+  aiConsent: z.boolean().refine(value => value === true, {
+    message: "Vous devez accepter le traitement par IA pour continuer."
+  })
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -55,6 +60,7 @@ export function TextAnalysisForm() {
       text: "",
       summary: "",
       emailInput: "",
+      aiConsent: false
     },
   });
 
@@ -316,6 +322,14 @@ summary:
               )}
             />
 
+            <Alert className="bg-muted/50">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Le texte que vous soumettez sera analysé par un modèle d'IA (Gemini).
+                Aucune donnée personnelle ne sera conservée par ce service tiers au-delà du temps nécessaire au traitement.
+              </AlertDescription>
+            </Alert>
+
             <FormField
               control={form.control}
               name="summary"
@@ -372,6 +386,31 @@ summary:
                     </FormDescription>
                     <FormMessage />
                   </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="aiConsent"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      J'accepte que mon texte soit traité par un service d'IA
+                    </FormLabel>
+                    <FormDescription>
+                      En cochant cette case, vous acceptez que votre texte soit envoyé à un service d'IA externe pour analyse.
+                      Pour plus d'informations, consultez notre <a href="/privacy" className="underline" target="_blank">politique de confidentialité</a>.
+                    </FormDescription>
+                  </div>
+                  <FormMessage />
                 </FormItem>
               )}
             />
