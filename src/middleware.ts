@@ -32,6 +32,7 @@ export async function middleware(req: NextRequest) {
     if (!session && (
       req.nextUrl.pathname.startsWith('/documents') ||
       req.nextUrl.pathname.startsWith('/dashboard') ||
+      req.nextUrl.pathname.startsWith('/account') ||
       req.nextUrl.pathname.startsWith('/my-documents')
     )) {
       // Redirection simple vers la page de login sans paramètre returnUrl
@@ -56,6 +57,7 @@ export async function middleware(req: NextRequest) {
 // Spécifier les routes à protéger
 export const config = {
   matcher: [
+    '/account/:path*',
     '/documents/:path*',
     '/dashboard/:path*',
     '/my-documents/:path*',

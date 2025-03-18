@@ -6,9 +6,9 @@ export default function LegalPage() {
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-3">1. Éditeur du site</h2>
         <p className="mb-3">
-          <strong>DoQCM</strong> est édité par :
+          <strong>DoQCM</strong> est édité par : jelloul mohamed
         </p>
-        <address className="not-italic mb-3">
+        {/* <address className="not-italic mb-3">
           <strong>[Nom de votre société/entité]</strong><br />
           Adresse : [Votre adresse complète]<br />
           Téléphone : [Votre numéro de téléphone]<br />
@@ -20,7 +20,7 @@ export default function LegalPage() {
         </p>
         <p>
           Représentant légal : [Nom du représentant légal]
-        </p>
+        </p> */}
       </section>
       
       <section className="mb-6">
@@ -29,10 +29,10 @@ export default function LegalPage() {
           Le site DoQCM est hébergé par :
         </p>
         <address className="not-italic">
-          <strong>[Nom de votre hébergeur]</strong><br />
-          Adresse : [Adresse de l'hébergeur]<br />
+          <strong>[SUPABASE]</strong><br />
+          {/* Adresse : [Adresse de l'hébergeur]<br />
           Téléphone : [Téléphone de l'hébergeur]<br />
-          Site web : [Site web de l'hébergeur]
+          Site web : [Site web de l'hébergeur] */}
         </address>
       </section>
       
