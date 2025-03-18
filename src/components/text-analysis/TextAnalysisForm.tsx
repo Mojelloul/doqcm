@@ -43,6 +43,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export function TextAnalysisForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [emails, setEmails] = useState<string[]>([]);
   const { supabase } = useSupabaseContext();
   const router = useRouter();
@@ -252,13 +253,9 @@ summary:
       form.reset();
       setEmails([]);
 
-      // Rediriger vers la page de résultats
-      const searchParams = new URLSearchParams({
-        prompt: prompt,
-        result: JSON.stringify(result, null, 2)
-      });
-      
-      router.push(`/analysis-result?${searchParams.toString()}`);
+      // Rediriger vers la page my-documents
+      setIsSubmitted(true);
+      router.push('/my-documents');
       
     } catch (error: any) {
       console.error("Erreur lors de la soumission:", error);
@@ -379,8 +376,12 @@ summary:
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Enregistrement..." : "Enregistrer l'analyse"}
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isLoading || isSubmitted}
+            >
+              {isLoading ? "Enregistrement..." : isSubmitted ? "Analyse envoyée" : "Enregistrer l'analyse"}
             </Button>
           </form>
         </Form>
