@@ -110,6 +110,27 @@ export function TextAnalysisForm() {
         throw new Error("Vous devez être connecté pour enregistrer une analyse");
       }
 
+      // Vérifier si les emails existent dans la table users
+      const { data: existingUsers, error: usersError } = await supabase
+        .rpc('check_users_exist', { user_emails: emails });
+
+      if (usersError) {
+        console.error("Erreur lors de la vérification des utilisateurs:", usersError);
+        throw new Error("Erreur lors de la vérification des utilisateurs");
+      }
+
+      if (!existingUsers || existingUsers.length === 0) {
+        throw new Error("Aucun des emails fournis n'existe dans l'application. Veuillez vérifier les adresses email.");
+      }
+
+      // Vérifier si tous les emails fournis existent
+      const existingEmails = existingUsers.map((user: { email: string }) => user.email);
+      const invalidEmails = emails.filter(email => !existingEmails.includes(email));
+      
+      if (invalidEmails.length > 0) {
+        throw new Error(`Les emails suivants n'existent pas dans l'application : ${invalidEmails.join(', ')}`);
+      }
+
       // Appel à Gemini pour l'analyse
       const prompt = `You are an advanced AI specialized in text analysis and quiz generation.  
 
@@ -195,19 +216,6 @@ summary:
       if (documentError) throw documentError;
       if (!document) throw new Error("Erreur lors de la création du document");
 
-      // Vérifier les utilisateurs et créer les partages
-      const { data: sharedUsers, error: usersError } = await supabase
-        .rpc('check_users_exist', { user_emails: emails });
-
-      if (usersError) {
-        console.error("Erreur lors de la vérification des utilisateurs:", usersError);
-        throw new Error("Erreur lors de la vérification des utilisateurs");
-      }
-      
-      if (!sharedUsers || sharedUsers.length === 0) {
-        throw new Error(`Les utilisateurs spécifiés n'existent pas dans l'application. Veuillez vérifier que ces utilisateurs sont bien inscrits.`);
-      }
-
       // Sauvegarder les questions et les choix une seule fois pour le document
       const questionsData = [];
 
@@ -245,7 +253,7 @@ summary:
       }
 
       // Créer les partages de documents avec les utilisateurs
-      const sharingData = sharedUsers.map((user: { id: string, email: string }) => ({
+      const sharingData = existingUsers.map((user: { id: string; email: string }) => ({
         employee_id: user.id,
         document_id: document.id
       }));
