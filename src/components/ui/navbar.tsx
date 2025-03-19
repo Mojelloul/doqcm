@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
 import { Button } from "@/components/ui/button";
 import { LogOut, FileText, Home, Menu, X, User, Info } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +48,7 @@ export function Navbar() {
     <nav className="border-b bg-background">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-4">
+          <ThemeToggle />
           <Link href="/" className="font-bold text-xl flex items-center">
             <FileText className="h-5 w-5 mr-2" />
             DoQCM
