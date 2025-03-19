@@ -38,7 +38,7 @@ export default function RootLayout({
         >
           <SupabaseProvider>
             <Navbar />
-            <main className="flex-grow py-8">
+            <main className="flex-grow">
               {children}
             </main>
             <footer className="border-t py-6 bg-muted/20">

@@ -13,8 +13,8 @@ export default function Home() {
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-5xl">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center p-3 bg-blue-100 dark:bg-blue-900 rounded-full mb-6">
-              <FileText className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+            <div className="inline-flex items-center justify-center p-3 rounded-full mb-6">
+              <img src="/logo.png" alt="DoQCM Logo" className="h-10 w-10 bg-white rounded-[50px]" />
             </div>
             <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">
               Bienvenue sur <span className="text-blue-600 dark:text-blue-400">DoQCM</span>

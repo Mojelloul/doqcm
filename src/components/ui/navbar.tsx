@@ -50,7 +50,7 @@ export function Navbar() {
         <div className="flex items-center space-x-4">
           <ThemeToggle />
           <Link href="/" className="font-bold text-xl flex items-center">
-            <FileText className="h-5 w-5 mr-2" />
+            <img src="/logo.png" alt="DoQCM Logo" className="h-8 w-8 mr-2 bg-white rounded-[50px]" />
             DoQCM
           </Link>
           <div className="hidden md:flex space-x-2">
