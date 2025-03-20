@@ -76,55 +76,57 @@ export function Navbar() {
             <img src="/logo.png" alt="DoQCM Logo" className="h-8 w-8 mr-2 bg-white rounded-[50px]" />
             DoQCM
           </Link>
-          <div className="hidden md:flex space-x-2">
-            <Button variant="ghost" asChild>
-              <Link href="/dashboard" className="flex items-center">
-                <Home className="h-4 w-4 mr-2" />
-                Accueil
-              </Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/documents" className="flex items-center">
-                <FileText className="h-4 w-4 mr-2" />
-                Docs Partagés
-              </Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/my-documents" className="flex items-center">
-                <FileText className="h-4 w-4 mr-2" />
-                Mes Créations
-              </Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/account" className="flex items-center">
-                <User className="h-4 w-4 mr-2" />
-                Mon Compte
-              </Link>
-            </Button>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center">
-                  <Info className="h-4 w-4 mr-2" />
-                  Informations
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link href="/privacy" className="flex items-center w-full">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Politique de confidentialité
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/legal" className="flex items-center w-full">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Mentions légales
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          {isLoggedIn && (
+            <div className="hidden md:flex space-x-2">
+              <Button variant="ghost" asChild>
+                <Link href="/dashboard" className="flex items-center">
+                  <Home className="h-4 w-4 mr-2" />
+                  Accueil
+                </Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/documents" className="flex items-center">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Docs Partagés
+                </Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/my-documents" className="flex items-center">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Mes Créations
+                </Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/account" className="flex items-center">
+                  <User className="h-4 w-4 mr-2" />
+                  Mon Compte
+                </Link>
+              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center">
+                    <Info className="h-4 w-4 mr-2" />
+                    Informations
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link href="/privacy" className="flex items-center w-full">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Politique de confidentialité
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/legal" className="flex items-center w-full">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Mentions légales
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
         </div>
         
         <div className="flex items-center">
@@ -143,23 +145,25 @@ export function Navbar() {
           </Button>
           
           {/* Bouton du menu mobile */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:hidden" 
-            onClick={toggleMobileMenu}
-          >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </Button>
+          {isLoggedIn && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="md:hidden" 
+              onClick={toggleMobileMenu}
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
+          )}
         </div>
       </div>
       
       {/* Menu mobile */}
-      {mobileMenuOpen && (
+      {mobileMenuOpen && isLoggedIn && (
         <div className="md:hidden bg-background border-b">
           <div className="container mx-auto px-4 py-3 flex flex-col space-y-3">
             <Button variant="ghost" asChild className="justify-start">
