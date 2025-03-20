@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
@@ -17,8 +17,26 @@ import {
 export function Navbar() {
   const [isLoading, setIsLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { supabase } = useSupabaseContext();
   const router = useRouter();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsLoggedIn(!!session);
+    };
+    checkSession();
+
+    // Écouter les changements d'état de la session
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   const handleLogout = async () => {
     try {
@@ -28,6 +46,7 @@ export function Navbar() {
       if (session) {
         // Supprimer la session et les cookies
         await supabase.auth.signOut();
+        setIsLoggedIn(false);
         // Rediriger vers la page de connexion
         router.push("/login");
         // Forcer un rechargement de la page pour nettoyer l'état
@@ -38,6 +57,10 @@ export function Navbar() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLogin = () => {
+    router.push("/login");
   };
 
   const toggleMobileMenu = () => {
@@ -107,14 +130,14 @@ export function Navbar() {
         <div className="flex items-center">
           <Button 
             variant="outline" 
-            onClick={handleLogout} 
+            onClick={isLoggedIn ? handleLogout : handleLogin}
             disabled={isLoading}
             className="hidden md:flex items-center"
           >
-            {isLoading ? "Déconnexion..." : (
+            {isLoading ? (isLoggedIn ? "Déconnexion..." : "Login...") : (
               <>
                 <LogOut className="h-4 w-4 mr-2" />
-                Déconnexion
+                {isLoggedIn ? "Déconnexion" : "Login"}
               </>
             )}
           </Button>
@@ -178,16 +201,16 @@ export function Navbar() {
             <Button 
               variant="outline" 
               onClick={() => {
-                handleLogout();
+                isLoggedIn ? handleLogout() : handleLogin();
                 setMobileMenuOpen(false);
               }} 
               disabled={isLoading}
               className="flex items-center justify-start"
             >
-              {isLoading ? "Déconnexion..." : (
+              {isLoading ? (isLoggedIn ? "Déconnexion..." : "Login...") : (
                 <>
                   <LogOut className="h-4 w-4 mr-2" />
-                  Déconnexion
+                  {isLoggedIn ? "Déconnexion" : "Login"}
                 </>
               )}
             </Button>
