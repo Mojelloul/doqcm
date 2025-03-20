@@ -13,22 +13,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Image from 'next/image';
 
 export function Navbar() {
-  const [isLoading, setIsLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { supabase } = useSupabaseContext();
   const router = useRouter();
 
   useEffect(() => {
+    if (!supabase) return;
+
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsLoggedIn(!!session);
     };
     checkSession();
 
-    // Écouter les changements d'état de la session
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsLoggedIn(!!session);
     });
@@ -40,22 +41,17 @@ export function Navbar() {
 
   const handleLogout = async () => {
     try {
-      setIsLoading(true);
-      // Vérifier si une session existe avant de se déconnecter
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        // Supprimer la session et les cookies
-        await supabase.auth.signOut();
-        setIsLoggedIn(false);
-        // Rediriger vers la page de connexion
-        router.push("/login");
-        // Forcer un rechargement de la page pour nettoyer l'état
-        window.location.href = "/login";
+      if (!supabase) {
+        throw new Error("Client Supabase non initialisé");
       }
+
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
+      router.push('/login');
     } catch (error) {
-      console.error("Erreur lors de la déconnexion:", error);
-    } finally {
-      setIsLoading(false);
+      console.error('Error logging out:', error);
     }
   };
 
@@ -73,7 +69,13 @@ export function Navbar() {
         <div className="flex items-center space-x-4">
           <ThemeToggle />
           <Link href="/" className="font-bold text-xl flex items-center">
-            <img src="/logo.png" alt="DoQCM Logo" className="h-8 w-8 mr-2 bg-white rounded-[50px]" />
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={32}
+              height={32}
+              className="w-8 h-8 bg-white rounded-md"
+            />
             DoQCM
           </Link>
           {isLoggedIn && (
@@ -133,15 +135,10 @@ export function Navbar() {
           <Button 
             variant="outline" 
             onClick={isLoggedIn ? handleLogout : handleLogin}
-            disabled={isLoading}
             className="hidden md:flex items-center"
           >
-            {isLoading ? (isLoggedIn ? "Déconnexion..." : "Login...") : (
-              <>
-                <LogOut className="h-4 w-4 mr-2" />
-                {isLoggedIn ? "Déconnexion" : "Login"}
-              </>
-            )}
+            <LogOut className="h-4 w-4 mr-2" />
+            {isLoggedIn ? "Déconnexion" : "Login"}
           </Button>
           
           {/* Bouton du menu mobile */}
@@ -205,18 +202,17 @@ export function Navbar() {
             <Button 
               variant="outline" 
               onClick={() => {
-                isLoggedIn ? handleLogout() : handleLogin();
+                if (isLoggedIn) {
+                  handleLogout();
+                } else {
+                  handleLogin();
+                }
                 setMobileMenuOpen(false);
-              }} 
-              disabled={isLoading}
+              }}
               className="flex items-center justify-start"
             >
-              {isLoading ? (isLoggedIn ? "Déconnexion..." : "Login...") : (
-                <>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  {isLoggedIn ? "Déconnexion" : "Login"}
-                </>
-              )}
+              <LogOut className="h-4 w-4 mr-2" />
+              {isLoggedIn ? "Déconnexion" : "Login"}
             </Button>
           </div>
         </div>
