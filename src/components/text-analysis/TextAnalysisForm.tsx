@@ -142,7 +142,7 @@ export function TextAnalysisForm() {
 
 2. **Generate a Multiple-Choice Quiz (MCQ) based on the text:**  
    - The **questions and answers must be in the same language as the text**.
-   - Create exactly 3 questions.
+   - Create exactly 6 questions.
    - Each question must be clear and relevant to the text.
    - Provide **three answer choices (A, B, C)** per question.
    - Only **one answer** should be correct.  
@@ -217,7 +217,7 @@ summary:
       if (!document) throw new Error("Erreur lors de la création du document");
 
       // Sauvegarder les questions et les choix une seule fois pour le document
-      const questionsData = [];
+      const questionsData: { id: string }[] = [];
 
       // Pour chaque question du QCM
       for (const qcmQuestion of result.qcm) {
@@ -251,6 +251,25 @@ summary:
 
         if (choicesError) throw choicesError;
       }
+
+      // Sélectionner 3 questions aléatoires pour chaque utilisateur
+      const questionsForUsers = existingUsers.map((user: { id: string; email: string }) => {
+        // Mélanger les questions et prendre les 3 premières
+        const shuffledQuestions = [...questionsData].sort(() => Math.random() - 0.5).slice(0, 3);
+        
+        // Créer les entrées pour users_questions
+        return shuffledQuestions.map(question => ({
+          user_id: user.id,
+          question_id: question.id
+        }));
+      }).flat(); // Aplatir le tableau pour avoir toutes les entrées
+
+      // Insérer les questions pour chaque utilisateur
+      const { error: usersQuestionsError } = await supabase
+        .from("users_questions")
+        .insert(questionsForUsers);
+
+      if (usersQuestionsError) throw usersQuestionsError;
 
       // Créer les partages de documents avec les utilisateurs
       const sharingData = existingUsers.map((user: { id: string; email: string }) => ({

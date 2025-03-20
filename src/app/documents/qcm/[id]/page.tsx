@@ -105,8 +105,14 @@ export default function DocumentQCMPage() {
         // Récupérer les questions QCM associées au document
         const { data: questionsData, error: questionsError } = await supabase
           .from('qcm_questions')
-          .select('*')
-          .eq('document_id', documentId);
+          .select(`
+            *,
+            users_questions!inner (
+              user_id
+            )
+          `)
+          .eq('document_id', documentId)
+          .eq('users_questions.user_id', userData.user.id);
 
         if (questionsError) {
           console.error("Erreur lors de la récupération des questions:", questionsError);
