@@ -83,25 +83,25 @@ export function Navbar() {
               <Button variant="ghost" asChild>
                 <Link href="/dashboard" className="flex items-center">
                   <Home className="h-4 w-4 mr-2" />
-                  Accueil
+                  Tableau de bord
                 </Link>
               </Button>
               <Button variant="ghost" asChild>
                 <Link href="/documents" className="flex items-center">
                   <FileText className="h-4 w-4 mr-2" />
-                  Docs Partagés
+                  Documents partagés
                 </Link>
               </Button>
               <Button variant="ghost" asChild>
                 <Link href="/my-documents" className="flex items-center">
                   <FileText className="h-4 w-4 mr-2" />
-                  Mes Créations
+                  Mes documents
                 </Link>
               </Button>
               <Button variant="ghost" asChild>
                 <Link href="/account" className="flex items-center">
                   <User className="h-4 w-4 mr-2" />
-                  Mon Compte
+                  Profil
                 </Link>
               </Button>
               
@@ -109,14 +109,14 @@ export function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center">
                     <Info className="h-4 w-4 mr-2" />
-                    Informations
+                    À propos
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
                     <Link href="/privacy" className="flex items-center w-full">
                       <FileText className="h-4 w-4 mr-2" />
-                      Politique de confidentialité
+                      Confidentialité
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -138,7 +138,7 @@ export function Navbar() {
             className="hidden md:flex items-center"
           >
             <LogOut className="h-4 w-4 mr-2" />
-            {isLoggedIn ? "Déconnexion" : "Login"}
+            {isLoggedIn ? "Se déconnecter" : "Se connecter"}
           </Button>
           
           {/* Bouton du menu mobile */}
@@ -166,31 +166,31 @@ export function Navbar() {
             <Button variant="ghost" asChild className="justify-start">
               <Link href="/dashboard" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 <Home className="h-4 w-4 mr-2" />
-                Accueil
+                Tableau de bord
               </Link>
             </Button>
             <Button variant="ghost" asChild className="justify-start">
               <Link href="/documents" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 <FileText className="h-4 w-4 mr-2" />
-                Docs Partagés
+                Documents partagés
               </Link>
             </Button>
             <Button variant="ghost" asChild className="justify-start">
               <Link href="/my-documents" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 <FileText className="h-4 w-4 mr-2" />
-                Mes Créations
+                Mes documents
               </Link>
             </Button>
             <Button variant="ghost" asChild className="justify-start">
               <Link href="/account" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 <User className="h-4 w-4 mr-2" />
-                Mon Compte
+                Profil
               </Link>
             </Button>
             <Button variant="ghost" asChild className="justify-start">
               <Link href="/privacy" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 <FileText className="h-4 w-4 mr-2" />
-                Politique de confidentialité
+                Confidentialité
               </Link>
             </Button>
             <Button variant="ghost" asChild className="justify-start">
@@ -212,7 +212,7 @@ export function Navbar() {
               className="flex items-center justify-start"
             >
               <LogOut className="h-4 w-4 mr-2" />
-              {isLoggedIn ? "Déconnexion" : "Login"}
+              {isLoggedIn ? "Se déconnecter" : "Se connecter"}
             </Button>
           </div>
         </div>

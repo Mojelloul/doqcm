@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
 import { useRouter } from "next/navigation";
+import { Download, Trash2, Loader2 } from "lucide-react";
 
 export default function AccountPage() {
   const { supabase } = useSupabaseContext();
@@ -125,34 +126,69 @@ export default function AccountPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Gestion de mes données</h1>
+      <h1 className="text-3xl font-bold mb-8">Gestion du compte</h1>
       
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Télécharger mes données</CardTitle>
+          <CardTitle className="text-xl">Exportation des données</CardTitle>
+          <CardDescription>
+            Téléchargez l&apos;ensemble de vos données personnelles au format JSON
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="mb-4">
-            Conformément au RGPD, vous pouvez télécharger toutes vos données personnelles au format JSON.
-            Ce fichier contiendra vos informations de compte, vos documents et vos QCM.
+          <p className="text-gray-600 mb-6">
+            Conformément au RGPD, vous pouvez télécharger toutes vos données personnelles. 
+            Le fichier contiendra vos informations de compte, vos documents et vos QCM.
           </p>
-          <Button onClick={downloadData} disabled={isLoading}>
-            {isLoading ? "Préparation en cours..." : "Télécharger mes données"}
+          <Button 
+            onClick={downloadData} 
+            disabled={isLoading}
+            className="flex items-center gap-2"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Préparation en cours...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4" />
+                Télécharger mes données
+              </>
+            )}
           </Button>
         </CardContent>
       </Card>
       
       <Card>
         <CardHeader>
-          <CardTitle className="text-destructive">Supprimer mon compte</CardTitle>
+          <CardTitle className="text-xl text-red-600">Zone de danger</CardTitle>
+          <CardDescription>
+            Actions irréversibles sur votre compte
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="mb-4">
-            La suppression de votre compte est irréversible et entraînera la perte de toutes vos données,
-            y compris vos documents et QCM.
+          <p className="text-gray-600 mb-6">
+            La suppression de votre compte entraînera la perte définitive de toutes vos données, 
+            y compris vos documents et QCM. Cette action ne peut pas être annulée.
           </p>
-          <Button variant="destructive" onClick={deleteAccount} disabled={isLoading}>
-            {isLoading ? "Suppression en cours..." : "Supprimer mon compte"}
+          <Button 
+            variant="destructive" 
+            onClick={deleteAccount} 
+            disabled={isLoading}
+            className="flex items-center gap-2"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Suppression en cours...
+              </>
+            ) : (
+              <>
+                <Trash2 className="h-4 w-4" />
+                Supprimer mon compte
+              </>
+            )}
           </Button>
         </CardContent>
       </Card>

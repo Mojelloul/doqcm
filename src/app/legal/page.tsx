@@ -1,105 +1,90 @@
+"use client";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 export default function LegalPage() {
+  const router = useRouter();
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">Mentions légales</h1>
-      
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">1. Éditeur du site</h2>
-        <p className="mb-3">
-          <strong>DoQCM</strong> est édité par : jelloul mohamed
-        </p>
-        {/* <address className="not-italic mb-3">
-          <strong>[Nom de votre société/entité]</strong><br />
-          Adresse : [Votre adresse complète]<br />
-          Téléphone : [Votre numéro de téléphone]<br />
-          Email : contact@doqcm.com
-        </address>
-        <p className="mb-3">
-          SIRET : [Votre numéro SIRET]<br />
-          Numéro de TVA intracommunautaire : [Votre numéro de TVA]
-        </p>
-        <p>
-          Représentant légal : [Nom du représentant légal]
-        </p> */}
-      </section>
-      
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">2. Hébergement</h2>
-        <p className="mb-3">
-          Le site DoQCM est hébergé par :
-        </p>
-        <address className="not-italic">
-          <strong>[SUPABASE]</strong><br />
-          {/* Adresse : [Adresse de l'hébergeur]<br />
-          Téléphone : [Téléphone de l'hébergeur]<br />
-          Site web : [Site web de l'hébergeur] */}
-        </address>
-      </section>
-      
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">3. Propriété intellectuelle</h2>
-        <p className="mb-3">
-          L'ensemble du contenu de ce site (textes, images, vidéos, etc.) est la propriété exclusive de DoQCM
-          ou de ses partenaires et est protégé par les lois françaises et internationales relatives à la propriété intellectuelle.
-        </p>
-        <p>
-          Toute reproduction totale ou partielle est strictement interdite sans autorisation écrite préalable.
-        </p>
-      </section>
-      
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">4. Protection des données personnelles</h2>
-        <p className="mb-3">
-          Conformément à la loi "Informatique et Libertés" du 6 janvier 1978 modifiée et au Règlement Général
-          sur la Protection des Données (RGPD), vous disposez de droits concernant vos données personnelles.
-        </p>
-        <p className="mb-3">
-          Pour connaître les détails du traitement de vos données personnelles, veuillez consulter notre
-          <a href="/privacy" className="text-primary underline ml-1">politique de confidentialité</a>.
-        </p>
-        <p>
-          Le Délégué à la Protection des Données (DPO) peut être contacté à l'adresse : dpo@doqcm.com
-        </p>
-      </section>
-      
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">5. Liens hypertextes</h2>
-        <p className="mb-3">
-          Le site DoQCM peut contenir des liens hypertextes vers d'autres sites. 
-          Nous n'avons pas la possibilité de vérifier le contenu de ces sites, et
-          nous n'assumons aucune responsabilité quant à leur contenu.
-        </p>
-      </section>
-      
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">6. Limitation de responsabilité</h2>
-        <p className="mb-3">
-          DoQCM s'efforce d'assurer au mieux l'exactitude et la mise à jour des informations diffusées, 
-          mais ne peut garantir l'exactitude, la précision ou l'exhaustivité des informations mises à disposition.
-        </p>
-        <p>
-          En conséquence, nous déclinons toute responsabilité pour toute imprécision, inexactitude ou omission.
-        </p>
-      </section>
-      
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">7. Droit applicable et juridiction compétente</h2>
-        <p className="mb-3">
-          Les présentes mentions légales sont régies par le droit français. En cas de litige, les tribunaux français
-          seront seuls compétents.
-        </p>
-      </section>
-      
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">8. Contact</h2>
-        <p>
-          Pour toute question concernant ces mentions légales, veuillez nous contacter à l'adresse : legal@doqcm.com
-        </p>
-      </section>
-      
-      <p className="text-sm text-muted-foreground mt-8">
-        Dernière mise à jour : {new Date().toLocaleDateString()}
-      </p>
+    <div className="container mx-auto px-4 py-8">
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Mentions légales</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <section>
+            <h2 className="text-xl font-semibold mb-3">1. Éditeur du site</h2>
+            <p className="text-gray-600">
+              Le site DoQCM est édité par :
+            </p>
+            <div className="mt-2 text-gray-600">
+              <p>Mohamed Jelloul</p>
+              <p>Email : jelloulmohamed11@gmail.com</p>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-3">2. Hébergement</h2>
+            <p className="text-gray-600">
+              Le site est hébergé par Vercel Inc.
+            </p>
+            <div className="mt-2 text-gray-600">
+              <p>340 S Lemon Ave #4133</p>
+              <p>Walnut, CA 91789</p>
+              <p>États-Unis</p>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-3">3. Propriété intellectuelle</h2>
+            <p className="text-gray-600">
+              L&apos;ensemble du contenu de ce site (textes, images, vidéos, logos, etc.) est la propriété exclusive de DoQCM ou de ses partenaires. Toute reproduction, représentation, modification, publication, transmission, dénaturation, totale ou partielle du site ou de son contenu, par quelque procédé que ce soit, et sur quelque support que ce soit est interdite sans l&apos;autorisation écrite préalable.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-3">4. Protection des données personnelles</h2>
+            <p className="text-gray-600">
+              Conformément à la loi Informatique et Libertés du 6 janvier 1978 modifiée et au Règlement Général sur la Protection des Données (RGPD), vous disposez d&apos;un droit d&apos;accès, de rectification et de suppression des données vous concernant. Pour exercer ces droits, vous pouvez nous contacter par email à jelloulmohamed11@gmail.com.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-3">5. Liens hypertextes</h2>
+            <p className="text-gray-600">
+              Le site DoQCM peut contenir des liens hypertextes vers d&apos;autres sites. Nous ne pouvons pas être tenus responsables du contenu des sites vers lesquels des liens sont établis.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-3">6. Limitation de responsabilité</h2>
+            <p className="text-gray-600">
+              Les informations contenues sur ce site sont fournies à titre indicatif. Nous nous efforçons d&apos;assurer l&apos;exactitude et la mise à jour des informations diffusées, mais nous ne pouvons garantir l&apos;exactitude, la complétude ou l&apos;actualité des informations diffusées sur notre site.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-3">7. Loi applicable</h2>
+            <p className="text-gray-600">
+              Les présentes mentions légales sont soumises au droit français. En cas de litige, les tribunaux français seront seuls compétents.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold mb-3">8. Contact</h2>
+            <p className="text-gray-600">
+              Pour toute question concernant ces mentions légales, veuillez nous contacter à :
+            </p>
+            <p className="text-gray-600 mt-2">
+              Email : jelloulmohamed11@gmail.com
+            </p>
+          </section>
+        </CardContent>
+      </Card>
     </div>
   );
 } 

@@ -71,7 +71,7 @@ export default function DocumentsPage() {
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Mes Documents Partagés</h1>
+        <h1 className="text-2xl font-bold">Documents partagés</h1>
       </div>
 
       {isLoading ? (
@@ -80,15 +80,16 @@ export default function DocumentsPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-8">
             <FileText className="h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-lg font-medium text-gray-900">Aucun document partagé trouvé</p>
+            <p className="text-lg font-medium text-gray-900">Aucun document partagé</p>
             <p className="text-sm text-gray-500 mt-1">
-              Vous n'avez pas encore de documents partagés avec vous
+            Commencez par créer un nouveau document pour générer des QCM.
+
             </p>
             <Button
               onClick={() => router.push('/dashboard')}
               className="mt-4"
             >
-              Créer une analyse
+             Créer un document
             </Button>
           </CardContent>
         </Card>
@@ -105,14 +106,14 @@ export default function DocumentsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-500 line-clamp-3 mb-4">
-                  {doc.summary || doc.content.substring(0, 150) + "..."}
+                {doc.summary || "Aucun résumé disponible"}
                 </p>
-                <Button
+                <Button 
                   variant="outline"
                   className="w-full mt-4"
                   onClick={() => router.push(`/documents/qcm/${doc.id}`)}
                 >
-                  Voir le test QCM
+                  Consulter le document
                 </Button>
               </CardContent>
             </Card>

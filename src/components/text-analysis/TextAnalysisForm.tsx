@@ -347,15 +347,7 @@ summary:
                   <FormMessage />
                 </FormItem>
               )}
-            />
-
-            <Alert className="bg-muted/50">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                Le texte que vous soumettez sera analysé par un modèle d'IA (Gemini).
-                Aucune donnée personnelle ne sera conservée par ce service tiers au-delà du temps nécessaire au traitement.
-              </AlertDescription>
-            </Alert>
+            /> 
 
             <FormField
               control={form.control}
