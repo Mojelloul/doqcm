@@ -301,14 +301,14 @@ summary:
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle>Analyse de Texte</CardTitle>
+        <CardTitle>Création d'un nouveau document</CardTitle>
         <Button
           variant="outline"
           onClick={() => router.push('/documents')}
           className="flex items-center gap-2"
         >
           <FileText className="h-4 w-4" />
-          Mes Documents
+          Gérer mes documents
         </Button>
       </CardHeader>
       <CardContent>
@@ -319,9 +319,9 @@ summary:
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Titre</FormLabel>
+                  <FormLabel>Nom du document</FormLabel>
                   <FormControl>
-                    <Input placeholder="Entrez un titre..." {...field} />
+                    <Input placeholder="Donnez un nom à votre document..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -333,10 +333,10 @@ summary:
               name="text"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Texte à analyser</FormLabel>
+                  <FormLabel>Contenu du document</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Collez votre texte ici... (100-3000 caractères)"
+                      placeholder="Insérez le contenu à analyser... (entre 100 et 3000 caractères)"
                       className="min-h-[200px]"
                       {...field}
                     />
@@ -354,10 +354,10 @@ summary:
               name="summary"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Résumé et points importants</FormLabel>
+                  <FormLabel>Synthèse du document</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Ajoutez un résumé ou des points importants... (max 250 caractères)"
+                      placeholder="Résumez les points clés de votre document... (maximum 250 caractères)"
                       className="min-h-[100px]"
                       {...field}
                     />
@@ -375,7 +375,7 @@ summary:
               name="emailInput"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Emails des destinataires (max 3)</FormLabel>
+                  <FormLabel>Destinataires du document</FormLabel>
                   <div className="space-y-2">
                     <div className="flex flex-wrap gap-2 p-2 border rounded-md">
                       {emails.map((email) => (
@@ -393,7 +393,7 @@ summary:
                       <FormControl>
                         <Input
                           {...field}
-                          placeholder={emails.length >= 3 ? "Limite de 3 emails atteinte" : "Entrez les emails (appuyez sur Entrée ou virgule pour ajouter)"}
+                          placeholder={emails.length >= 3 ? "Nombre maximum de destinataires atteint" : "Ajoutez les adresses email (appuyez sur Entrée ou virgule pour valider)"}
                           onKeyDown={handleEmailKeyDown}
                           className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                           disabled={emails.length >= 3}
@@ -401,7 +401,7 @@ summary:
                       </FormControl>
                     </div>
                     <FormDescription>
-                      {emails.length}/3 emails ajoutés
+                      {emails.length}/3 destinataires ajoutés
                     </FormDescription>
                     <FormMessage />
                   </div>
@@ -422,11 +422,11 @@ summary:
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>
-                      J'accepte que mon texte soit traité par un service d'IA
+                      Traitement par intelligence artificielle
                     </FormLabel>
                     <FormDescription>
-                      En cochant cette case, vous acceptez que votre texte soit envoyé à un service d'IA externe pour analyse.
-                      Pour plus d'informations, consultez notre <a href="/privacy" className="underline" target="_blank">politique de confidentialité</a>.
+                      En validant cette option, vous autorisez le traitement de votre document par notre service d'analyse IA.
+                      Consultez notre <a href="/privacy" className="underline" target="_blank">politique de confidentialité</a> pour plus de détails.
                     </FormDescription>
                   </div>
                   <FormMessage />
@@ -439,7 +439,7 @@ summary:
               className="w-full" 
               disabled={isLoading || isSubmitted}
             >
-              {isLoading ? "Enregistrement..." : isSubmitted ? "Analyse envoyée" : "Enregistrer l'analyse"}
+              {isLoading ? "Traitement en cours..." : isSubmitted ? "Document créé avec succès" : "Créer le document"}
             </Button>
           </form>
         </Form>
