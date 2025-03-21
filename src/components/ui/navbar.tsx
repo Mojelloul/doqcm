@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
 import { Button } from "@/components/ui/button";
 import { LogOut, FileText, Home, Menu, X, User, Info } from "lucide-react";
@@ -20,6 +20,7 @@ export function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { supabase } = useSupabaseContext();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!supabase) return;
@@ -80,25 +81,37 @@ export function Navbar() {
           </Link>
           {isLoggedIn && (
             <div className="hidden md:flex space-x-2">
-              <Button variant="ghost" asChild>
+              <Button 
+                variant={pathname === "/dashboard" ? "default" : "ghost"} 
+                asChild
+              >
                 <Link href="/dashboard" className="flex items-center">
                   <Home className="h-4 w-4 mr-2" />
                   Tableau de bord
                 </Link>
               </Button>
-              <Button variant="ghost" asChild>
+              <Button 
+                variant={pathname.startsWith("/documents") ? "default" : "ghost"} 
+                asChild
+              >
                 <Link href="/documents" className="flex items-center">
                   <FileText className="h-4 w-4 mr-2" />
                   Documents partagés
                 </Link>
               </Button>
-              <Button variant="ghost" asChild>
+              <Button 
+                variant={pathname.startsWith("/my-documents") ? "default" : "ghost"} 
+                asChild
+              >
                 <Link href="/my-documents" className="flex items-center">
                   <FileText className="h-4 w-4 mr-2" />
                   Mes documents
                 </Link>
               </Button>
-              <Button variant="ghost" asChild>
+              <Button 
+                variant={pathname.startsWith("/account") ? "default" : "ghost"} 
+                asChild
+              >
                 <Link href="/account" className="flex items-center">
                   <User className="h-4 w-4 mr-2" />
                   Profil
@@ -107,7 +120,10 @@ export function Navbar() {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center">
+                  <Button 
+                    variant={pathname.startsWith("/privacy") || pathname.startsWith("/legal") ? "default" : "ghost"} 
+                    className="flex items-center"
+                  >
                     <Info className="h-4 w-4 mr-2" />
                     À propos
                   </Button>
@@ -141,7 +157,6 @@ export function Navbar() {
             {isLoggedIn ? "Se déconnecter" : "Se connecter"}
           </Button>
           
-          {/* Bouton du menu mobile */}
           {isLoggedIn && (
             <Button 
               variant="ghost" 
@@ -159,41 +174,64 @@ export function Navbar() {
         </div>
       </div>
       
-      {/* Menu mobile */}
       {mobileMenuOpen && isLoggedIn && (
         <div className="md:hidden bg-background border-b">
           <div className="container mx-auto px-4 py-3 flex flex-col space-y-3">
-            <Button variant="ghost" asChild className="justify-start">
+            <Button 
+              variant={pathname === "/dashboard" ? "default" : "ghost"} 
+              asChild 
+              className="justify-start"
+            >
               <Link href="/dashboard" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 <Home className="h-4 w-4 mr-2" />
                 Tableau de bord
               </Link>
             </Button>
-            <Button variant="ghost" asChild className="justify-start">
+            <Button 
+              variant={pathname.startsWith("/documents") ? "default" : "ghost"} 
+              asChild 
+              className="justify-start"
+            >
               <Link href="/documents" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 <FileText className="h-4 w-4 mr-2" />
                 Documents partagés
               </Link>
             </Button>
-            <Button variant="ghost" asChild className="justify-start">
+            <Button 
+              variant={pathname.startsWith("/my-documents") ? "default" : "ghost"} 
+              asChild 
+              className="justify-start"
+            >
               <Link href="/my-documents" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 <FileText className="h-4 w-4 mr-2" />
                 Mes documents
               </Link>
             </Button>
-            <Button variant="ghost" asChild className="justify-start">
+            <Button 
+              variant={pathname.startsWith("/account") ? "default" : "ghost"} 
+              asChild 
+              className="justify-start"
+            >
               <Link href="/account" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 <User className="h-4 w-4 mr-2" />
                 Profil
               </Link>
             </Button>
-            <Button variant="ghost" asChild className="justify-start">
+            <Button 
+              variant={pathname.startsWith("/privacy") ? "default" : "ghost"} 
+              asChild 
+              className="justify-start"
+            >
               <Link href="/privacy" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 <FileText className="h-4 w-4 mr-2" />
                 Confidentialité
               </Link>
             </Button>
-            <Button variant="ghost" asChild className="justify-start">
+            <Button 
+              variant={pathname.startsWith("/legal") ? "default" : "ghost"} 
+              asChild 
+              className="justify-start"
+            >
               <Link href="/legal" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 <FileText className="h-4 w-4 mr-2" />
                 Mentions légales
