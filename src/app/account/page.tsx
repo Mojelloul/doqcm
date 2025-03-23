@@ -1,16 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
 import { useRouter } from "next/navigation";
-import { Download, Trash2, Loader2 } from "lucide-react";
+import { Download, Trash2, Loader2, ArrowLeft } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 export default function AccountPage() {
   const { supabase } = useSupabaseContext();
   const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, [supabase.auth]);
 
   const downloadData = async () => {
     setIsLoading(true);
@@ -126,72 +137,100 @@ export default function AccountPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Gestion du compte</h1>
-      
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-xl">Exportation des données</CardTitle>
-          <CardDescription>
-            Téléchargez l&apos;ensemble de vos données personnelles au format JSON
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-600 mb-6">
-            Conformément au RGPD, vous pouvez télécharger toutes vos données personnelles. 
-            Le fichier contiendra vos informations de compte, vos documents et vos QCM.
-          </p>
-          <Button 
-            onClick={downloadData} 
-            disabled={isLoading}
-            className="flex items-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Préparation en cours...
-              </>
-            ) : (
-              <>
-                <Download className="h-4 w-4" />
-                Télécharger mes données
-              </>
-            )}
-          </Button>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl text-red-600">Zone de danger</CardTitle>
-          <CardDescription>
-            Actions irréversibles sur votre compte
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-600 mb-6">
-            La suppression de votre compte entraînera la perte définitive de toutes vos données, 
-            y compris vos documents et QCM. Cette action ne peut pas être annulée.
-          </p>
-          <Button 
-            variant="destructive" 
-            onClick={deleteAccount} 
-            disabled={isLoading}
-            className="flex items-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Suppression en cours...
-              </>
-            ) : (
-              <>
-                <Trash2 className="h-4 w-4" />
-                Supprimer mon compte
-              </>
-            )}
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="max-w-2xl mx-auto space-y-8">
+
+        <Card className="border-none shadow-lg">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold tracking-tight">Gestion du compte</CardTitle>
+            <CardDescription className="text-base">
+              Gérez vos informations personnelles et vos préférences
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-8">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Informations du compte</h3>
+              <div className="grid gap-4">
+                <div className="flex items-center gap-4 p-4 rounded-lg border bg-muted/50">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Email</p>
+                    <p className="text-sm text-muted-foreground">{user?.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 p-4 rounded-lg border bg-muted/50">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Date d'inscription</p>
+                    <p className="text-sm text-muted-foreground">
+                      {user?.created_at ? format(new Date(user.created_at), "d MMMM yyyy", { locale: fr }) : "Non disponible"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Exportation des données</h3>
+              <div className="grid gap-4">
+                <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/50">
+                  <div>
+                    <p className="text-sm font-medium">Télécharger mes données</p>
+                    <p className="text-sm text-muted-foreground">Exportez toutes vos données personnelles</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={downloadData}
+                    disabled={isLoading}
+                    className="group-hover:border-primary group-hover:text-primary"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Préparation en cours...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="mr-2 h-4 w-4" />
+                        Télécharger
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-destructive">Zone de danger</h3>
+              <div className="grid gap-4">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5">
+                  <div>
+                    <p className="text-sm font-medium text-destructive">Suppression du compte</p>
+                    <p className="text-sm text-muted-foreground">
+                      Supprimez définitivement votre compte et toutes vos données
+                    </p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    onClick={deleteAccount}
+                    disabled={isLoading}
+                    className="group-hover:bg-destructive/90"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Suppression en cours...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Supprimer
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 } 

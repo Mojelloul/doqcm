@@ -72,17 +72,6 @@ export default function MyDocumentsPage() {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Mes Documents Créés</h1>
-        <Button
-          onClick={() => router.push('/dashboard')}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Créer un document
-        </Button>
-      </div>
-
       {isLoading ? (
         <div className="text-center">Chargement des documents...</div>
       ) : documents.length === 0 ? (
