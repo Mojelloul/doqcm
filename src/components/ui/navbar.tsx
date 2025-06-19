@@ -18,17 +18,29 @@ import Image from 'next/image';
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { supabase } = useSupabaseContext();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase) {
+      setIsLoading(false);
+      return;
+    }
 
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsLoggedIn(!!session);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setIsLoggedIn(!!session);
+      } catch (error) {
+        console.error('Error checking session:', error);
+        setIsLoggedIn(false);
+      } finally {
+        setIsLoading(false);
+      }
     };
+    
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -63,6 +75,32 @@ export function Navbar() {
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
+
+  // Afficher un état de chargement si le client Supabase n'est pas encore initialisé
+  if (isLoading) {
+    return (
+      <nav className="border-b bg-background">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <ThemeToggle />
+            <Link href="/" className="font-bold text-xl flex items-center">
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                width={32}
+                height={32}
+                className="w-8 h-8 bg-white rounded-md"
+              />
+              DoQCM
+            </Link>
+          </div>
+          <div className="flex items-center">
+            <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="border-b bg-background">
@@ -218,39 +256,12 @@ export function Navbar() {
               </Link>
             </Button>
             <Button 
-              variant={pathname.startsWith("/privacy") ? "default" : "ghost"} 
-              asChild 
+              variant="ghost" 
+              onClick={handleLogout}
               className="justify-start"
-            >
-              <Link href="/privacy" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
-                <FileText className="h-4 w-4 mr-2" />
-                Confidentialité
-              </Link>
-            </Button>
-            <Button 
-              variant={pathname.startsWith("/legal") ? "default" : "ghost"} 
-              asChild 
-              className="justify-start"
-            >
-              <Link href="/legal" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
-                <FileText className="h-4 w-4 mr-2" />
-                Mentions légales
-              </Link>
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                if (isLoggedIn) {
-                  handleLogout();
-                } else {
-                  handleLogin();
-                }
-                setMobileMenuOpen(false);
-              }}
-              className="flex items-center justify-start"
             >
               <LogOut className="h-4 w-4 mr-2" />
-              {isLoggedIn ? "Se déconnecter" : "Se connecter"}
+              Se déconnecter
             </Button>
           </div>
         </div>

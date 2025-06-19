@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
+import { useServices } from "@/lib/hooks/useServices";
 import {
   Card,
   CardContent,
@@ -14,52 +14,26 @@ import { Button } from "@/components/ui/button";
 import { FileText, Calendar, Plus, Users, BarChart } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-
-interface Document {
-  id: string;
-  title: string;
-  content: string;
-  summary: string;
-  created_at: string;
-  shared_count?: number;
-}
+import { Document } from "@/lib/types/document";
 
 export default function MyDocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { supabase } = useSupabaseContext();
+  const { documentService, userService } = useServices();
   const router = useRouter();
 
   useEffect(() => {
     async function fetchDocuments() {
       try {
-        const { data: userData, error: userError } = await supabase.auth.getUser();
+        const currentUser = await userService.getCurrentUser();
         
-        if (userError || !userData.user) {
+        if (!currentUser) {
           router.push('/login');
           return;
         }
 
-        // Récupérer les documents créés par l'utilisateur
-        const { data, error } = await supabase
-          .from('documents')
-          .select('*, employees_documents(document_id)')
-          .eq('owner_id', userData.user.id)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        
-        // Transformer les données pour correspondre à notre interface
-        const formattedData = data ? data.map((item: any) => ({
-          id: item.id,
-          title: item.title,
-          content: item.content,
-          summary: item.summary,
-          created_at: item.created_at,
-          shared_count: item.employees_documents ? item.employees_documents.length : 0
-        })) : [];
-        
-        setDocuments(formattedData);
+        const userDocuments = await documentService.getUserDocuments(currentUser.id);
+        setDocuments(userDocuments);
       } catch (error) {
         console.error('Error fetching documents:', error);
       } finally {
@@ -68,7 +42,7 @@ export default function MyDocumentsPage() {
     }
 
     fetchDocuments();
-  }, [supabase, router]);
+  }, [documentService, userService, router]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8">

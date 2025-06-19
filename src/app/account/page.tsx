@@ -3,77 +3,37 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
+import { useServices } from "@/lib/hooks/useServices";
 import { useRouter } from "next/navigation";
 import { Download, Trash2, Loader2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { User } from "@/lib/types/user";
 
 export default function AccountPage() {
-  const { supabase } = useSupabaseContext();
+  const { userService } = useServices();
   const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+      try {
+        const currentUser = await userService.getCurrentUser();
+        setUser(currentUser);
+      } catch (error) {
+        console.error('Erreur lors de la récupération de l\'utilisateur:', error);
+      }
     };
     getUser();
-  }, [supabase.auth]);
+  }, [userService]);
 
   const downloadData = async () => {
     setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error("Vous devez être connecté pour télécharger vos données");
-      }
-      
-      // Récupérer tous les documents de l'utilisateur
-      const { data: documents } = await supabase
-        .from("documents")
-        .select("*")
-        .eq("owner_id", user.id);
-        
-      // Récupérer les partages
-      const { data: sharedDocuments } = await supabase
-        .from("employees_documents")
-        .select("document_id")
-        .eq("employee_id", user.id);
-        
-      // Récupérer les QCM
-      const { data: qcmQuestions } = await supabase
-        .from("qcm_questions")
-        .select(`
-          id, 
-          question, 
-          document_id,
-          qcm_choices (
-            id,
-            choice,
-            is_correct
-          )
-        `)
-        .in(
-          "document_id", 
-          documents ? documents.map(doc => doc.id) : []
-        );
+      const userData = await userService.downloadUserData();
       
       // Créer un fichier de données à télécharger
-      const userData = {
-        user: {
-          id: user.id,
-          email: user.email,
-          created_at: user.created_at
-        },
-        documents,
-        sharedDocuments,
-        qcmQuestions
-      };
-      
       const dataStr = JSON.stringify(userData, null, 2);
       const dataBlob = new Blob([dataStr], { type: "application/json" });
       const url = URL.createObjectURL(dataBlob);
@@ -99,30 +59,7 @@ export default function AccountPage() {
     if (confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible et supprimera toutes vos données.")) {
       setIsLoading(true);
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user) {
-          throw new Error("Vous devez être connecté pour supprimer votre compte");
-        }
-        
-        // Supprimer les documents et données associées (les triggers SQL s'occupent de supprimer les données liées)
-        const { error: documentsError } = await supabase
-          .from("documents")
-          .delete()
-          .eq("owner_id", user.id);
-          
-        if (documentsError) throw documentsError;
-        
-        // Supprimer les partages
-        const { error: sharesError } = await supabase
-          .from("employees_documents")
-          .delete()
-          .eq("employee_id", user.id);
-          
-        if (sharesError) throw sharesError;
-        
-        // Déconnecter l'utilisateur
-        await supabase.auth.signOut();
+        await userService.deleteAccount();
         
         alert("Votre compte a été supprimé avec succès");
         router.push("/");

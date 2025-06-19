@@ -4,9 +4,9 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { X, FileText, AlertTriangle } from "lucide-react";
+import { X, FileText, AlertTriangle, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { gemini } from "@/lib/gemini";
+import { useServices } from "@/lib/hooks/useServices";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +21,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -50,7 +49,8 @@ export function TextAnalysisForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [emails, setEmails] = useState<string[]>([]);
-  const { supabase } = useSupabaseContext();
+  const [error, setError] = useState<string | null>(null);
+  const { userService, documentService, qcmService } = useServices();
   const router = useRouter();
 
   const form = useForm<FormData>({
@@ -70,8 +70,10 @@ export function TextAnalysisForm() {
 
     if ((event.key === 'Enter' || event.key === ',') && value) {
       event.preventDefault();
+      setError(null); // Réinitialiser les erreurs
+      
       if (emails.length >= 3) {
-        alert("Vous ne pouvez pas ajouter plus de 3 emails");
+        setError("Vous ne pouvez pas ajouter plus de 3 emails");
         return;
       }
       if (value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
@@ -81,7 +83,7 @@ export function TextAnalysisForm() {
         input.value = '';
         form.setValue('emailInput', '');
       } else {
-        alert("Veuillez entrer une adresse email valide");
+        setError("Veuillez entrer une adresse email valide");
       }
     }
   };
@@ -91,197 +93,92 @@ export function TextAnalysisForm() {
   };
 
   async function onSubmit(values: FormData) {
-    if (emails.length === 0) {
-      alert("Veuillez ajouter au moins 1 adresse email");
-      return;
-    }
-
-    if (emails.length > 3) {
-      alert("Vous ne pouvez pas ajouter plus de 3 emails");
-      return;
-    }
-
+    setIsLoading(true);
+    setError(null); // Réinitialiser les erreurs
+    
     try {
-      setIsLoading(true);
+      const currentUser = await userService.getCurrentUser();
       
-      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (!currentUser) {
+        throw new Error("Vous devez être connecté pour créer un document");
+      }
+
+      // Vérifier si des emails ont été fournis
+      if (emails.length === 0) {
+        throw new Error("Veuillez ajouter au moins un destinataire");
+      }
+
+      // Récupérer les utilisateurs existants
+      const existingUsers = await userService.checkUsersExist(emails);
       
-      if (!userData.user) {
-        throw new Error("Vous devez être connecté pour enregistrer une analyse");
-      }
-
-      // Vérifier si les emails existent dans la table users
-      const { data: existingUsers, error: usersError } = await supabase
-        .rpc('check_users_exist', { user_emails: emails });
-
-      if (usersError) {
-        console.error("Erreur lors de la vérification des utilisateurs:", usersError);
-        throw new Error("Erreur lors de la vérification des utilisateurs");
-      }
-
-      if (!existingUsers || existingUsers.length === 0) {
-        throw new Error("Aucun des emails fournis n'existe dans l'application. Veuillez vérifier les adresses email.");
-      }
-
-      // Vérifier si tous les emails fournis existent
-      const existingEmails = existingUsers.map((user: { email: string }) => user.email);
-      const invalidEmails = emails.filter(email => !existingEmails.includes(email));
+      // Identifier les emails qui n'existent pas
+      const existingEmails = existingUsers.map(user => user.email);
+      const nonExistentEmails = emails.filter(email => !existingEmails.includes(email));
       
-      if (invalidEmails.length > 0) {
-        throw new Error(`Les emails suivants n'existent pas dans l'application : ${invalidEmails.join(', ')}`);
+      if (nonExistentEmails.length > 0) {
+        const emailList = nonExistentEmails.join(', ');
+        throw new Error(`Les adresses email suivantes n'existent pas dans notre système : ${emailList}`);
       }
 
-      // Appel à Gemini pour l'analyse
-      const prompt = `You are an advanced AI specialized in text analysis and quiz generation.  
+      if (existingUsers.length === 0) {
+        throw new Error("Aucun utilisateur trouvé avec les emails fournis");
+      }
 
-### Instructions:  
-1. **Analyze the given text:**  
-   - Detect the **language** of the text.  
-   - Extract the **title** if available.  
-   - Summarize the text or highlight key points.  
+      // Générer le QCM avec l'IA
+      const qcmResult = await qcmService.generateQCMFromText(values.text, values.title, values.summary);
+      
+      if (!qcmResult || !qcmResult.qcm || qcmResult.qcm.length === 0) {
+        throw new Error("Erreur lors de la génération du QCM par l'IA");
+      }
 
-2. **Generate a Multiple-Choice Quiz (MCQ) based on the text:**  
-   - The **questions and answers must be in the same language as the text**.
-   - Create exactly 6 questions.
-   - Each question must be clear and relevant to the text.
-   - Provide **three answer choices (A, B, C)** per question.
-   - Only **one answer** should be correct.  
-3. **Output format (JSON):**  
-   - The result must be returned in a structured JSON format as follows:  
+      // Créer le document
+      console.log("Création du document...");
+      const document = await documentService.createDocument({
+        title: values.title,
+        content: values.text,
+        summary: values.summary,
+        owner_id: currentUser.id,
+      });
 
-\`\`\`json
-{
-  "qcm": [
-    {
-      "question": "Question text in the detected language",
-      "choices": {
-        "A": "Option 1",
-        "B": "Option 2",
-        "C": "Option 3"
-      },
-      "correct_answer": "A",
-      "justification": "Explanation or reference to the text"
-    },
-    {
-      "question": "Question text in the detected language",
-      "choices": {
-        "A": "Option 1",
-        "B": "Option 2",
-        "C": "Option 3"
-      },
-      "correct_answer": "B",
-      "justification": "Explanation or reference to the text"
-    }
-  ]
-}
-  \`\`\`
-  Important Notes:
-- The AI must automatically detect the language of the provided text and generate the questions accordingly.
-- The instruction must always remain in English, regardless of the text language.
-- The justification should explain why the correct answer is valid, using an extract from the text or a short clarification.
+      console.log("Document créé:", document.id);
 
-Input:
-Here is the full text to analyze and transform into a quiz:
-[${values.text}]
-
-title:
-[${values.title}]
-
-summary:
-[${values.summary}]`;
-
-      const result = await gemini.generateJSON<{
-        qcm: Array<{
-          question: string;
-          choices: { A: string; B: string; C: string };
-          correct_answer: "A" | "B" | "C";
-          justification: string;
-        }>;
-      }>(prompt);
-
-      // Sauvegarder dans Supabase
-      const { data: document, error: documentError } = await supabase
-        .from("documents")
-        .insert([
-          {
-            title: values.title,
-            content: values.text,
-            summary: values.summary,
-            owner_id: userData.user.id,
-          },
-        ])
-        .select()
-        .single();
-
-      if (documentError) throw documentError;
-      if (!document) throw new Error("Erreur lors de la création du document");
-
-      // Sauvegarder les questions et les choix une seule fois pour le document
+      // Créer les questions et choix
+      console.log("Création des questions QCM...");
       const questionsData: { id: string }[] = [];
 
-      // Pour chaque question du QCM
-      for (const qcmQuestion of result.qcm) {
+      for (const qcmQuestion of qcmResult.qcm) {
         // Créer la question
-        const { data: questionData, error: questionError } = await supabase
-          .from("qcm_questions")
-          .insert([
-            {
-              document_id: document.id,
-              question: qcmQuestion.question
-            }
-          ])
-          .select()
-          .single();
-
-        if (questionError) throw questionError;
-        if (!questionData) throw new Error("Erreur lors de la création de la question");
+        const question = await qcmService.createQuestion({
+          document_id: document.id,
+          question: qcmQuestion.question
+        });
         
-        questionsData.push(questionData);
+        questionsData.push(question);
 
         // Créer les choix pour cette question
         const choicesData = Object.entries(qcmQuestion.choices).map(([key, value]) => ({
-          question_id: questionData.id,
-          choice: value,
+          question_id: question.id,
+          choice: String(value),
           is_correct: key === qcmQuestion.correct_answer
         }));
 
-        const { error: choicesError } = await supabase
-          .from("qcm_choices")
-          .insert(choicesData);
-
-        if (choicesError) throw choicesError;
+        await qcmService.createChoices(choicesData);
       }
 
-      // Sélectionner 3 questions aléatoires pour chaque utilisateur
-      const questionsForUsers = existingUsers.map((user: { id: string; email: string }) => {
-        // Mélanger les questions et prendre les 3 premières
-        const shuffledQuestions = [...questionsData].sort(() => Math.random() - 0.5).slice(0, 3);
-        
-        // Créer les entrées pour users_questions
-        return shuffledQuestions.map(question => ({
-          user_id: user.id,
-          question_id: question.id
-        }));
-      }).flat(); // Aplatir le tableau pour avoir toutes les entrées
+      console.log("Questions créées:", questionsData.length);
 
-      // Insérer les questions pour chaque utilisateur
-      const { error: usersQuestionsError } = await supabase
-        .from("users_questions")
-        .insert(questionsForUsers);
+      // Assigner des questions aux utilisateurs
+      console.log("Assignation des questions aux utilisateurs...");
+      await qcmService.assignQuestionsToUsers(questionsData, existingUsers);
 
-      if (usersQuestionsError) throw usersQuestionsError;
+      // Partager le document avec les utilisateurs
+      console.log("Partage du document...");
+      const userIds = existingUsers.map((user: { id: string }) => user.id);
+      console.log("Utilisateurs à partager:", userIds);
+      
+      await documentService.shareDocument(document.id, userIds);
 
-      // Créer les partages de documents avec les utilisateurs
-      const sharingData = existingUsers.map((user: { id: string; email: string }) => ({
-        employee_id: user.id,
-        document_id: document.id
-      }));
-
-      const { error: sharingError } = await supabase
-        .from("employees_documents")
-        .insert(sharingData);
-
-      if (sharingError) throw sharingError;
+      console.log("Document partagé avec succès");
 
       form.reset();
       setEmails([]);
@@ -291,8 +188,27 @@ summary:
       router.push('/my-documents');
       
     } catch (error: any) {
-      console.error("Erreur lors de la soumission:", error);
-      alert(error.message);
+      console.error("Erreur lors de la soumission:", {
+        error,
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
+      
+      // Afficher un message d'erreur plus spécifique
+      let errorMessage = "Une erreur inattendue s'est produite";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        // Essayer d'extraire le message de différentes propriétés
+        errorMessage = error.message || error.error || error.details || error.reason || JSON.stringify(error);
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -314,6 +230,12 @@ summary:
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             <FormField
               control={form.control}
               name="title"

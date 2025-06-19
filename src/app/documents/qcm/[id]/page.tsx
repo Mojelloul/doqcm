@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
+import { useServices } from "@/lib/hooks/useServices";
 import {
   Card,
   CardContent,
@@ -15,27 +15,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, FileText, HelpCircle, Home } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-
-interface Document {
-  id: string;
-  title: string;
-  content: string;
-  summary: string;
-  created_at: string;
-}
-
-interface Question {
-  id: string;
-  document_id: string;
-  question: string;
-}
-
-interface Choice {
-  id: string;
-  question_id: string;
-  choice: string;
-  is_correct: boolean;
-}
+import { Document } from "@/lib/types/document";
+import { Question, Choice, QCMScore } from "@/lib/types/qcm";
 
 export default function DocumentQCMPage() {
   const [document, setDocument] = useState<Document | null>(null);
@@ -43,10 +24,11 @@ export default function DocumentQCMPage() {
   const [questionChoices, setQuestionChoices] = useState<Record<string, Choice[]>>({});
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
   const [showResults, setShowResults] = useState(false);
-  const [score, setScore] = useState({ correct: 0, total: 0, percentage: 0 });
+  const [score, setScore] = useState<QCMScore>({ correct: 0, total: 0, percentage: 0 });
   const [isLoading, setIsLoading] = useState(true);
-  const [hasExistingScore, setHasExistingScore] = useState(false);
-  const { supabase } = useSupabaseContext();
+  const [existingScore, setExistingScore] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const { documentService, qcmService, userService } = useServices();
   const router = useRouter();
   const params = useParams();
   const documentId = params.id as string;
@@ -54,125 +36,82 @@ export default function DocumentQCMPage() {
   useEffect(() => {
     async function fetchDocumentAndQuestions() {
       try {
-        const { data: userData, error: userError } = await supabase.auth.getUser();
+        setError(null);
+        const currentUser = await userService.getCurrentUser();
         
-        if (userError || !userData.user) {
+        if (!currentUser) {
           router.push('/login');
           return;
         }
 
         // Vérifier si l'utilisateur a déjà un score pour ce document
-        const { data: existingScore, error: scoreError } = await supabase
-          .from('employees_documents')
-          .select('score')
-          .match({ 
-            employee_id: userData.user.id,
-            document_id: documentId
-          })
-          .single();
+        try {
+          const userScore = await documentService.getUserScoreForDocument(documentId, currentUser.id);
           
-        if (scoreError && scoreError.code !== 'PGRST116') { // PGRST116 = Not found
-          console.error("Erreur lors de la vérification du score existant:", scoreError);
-        } else if (existingScore && existingScore.score !== null) {
-          console.log("Score existant trouvé:", existingScore.score);
-          setHasExistingScore(true);
-          setScore({
-            correct: 0, // Ces valeurs seront mises à jour plus tard
-            total: 0,
-            percentage: existingScore.score
-          });
-          setShowResults(true);
+          if (userScore !== null) {
+            console.log("Score existant trouvé:", userScore);
+            setExistingScore(userScore);
+            setScore({
+              correct: 0, // Ces valeurs seront mises à jour plus tard
+              total: 0,
+              percentage: userScore
+            });
+            setShowResults(true);
+          }
+        } catch (scoreError) {
+          console.warn('Erreur lors de la récupération du score:', scoreError);
+          // On continue même si on ne peut pas récupérer le score
         }
 
         // Récupérer les détails du document
-        const { data: documentData, error: documentError } = await supabase
-          .from('documents')
-          .select('*')
-          .eq('id', documentId)
-          .single();
-
-        if (documentError) {
-          console.error("Erreur lors de la récupération du document:", documentError);
-          throw documentError;
-        }
+        const documentData = await documentService.getDocumentById(documentId);
 
         if (!documentData) {
-          console.error("Document non trouvé");
-          router.push('/documents');
+          setError("Document non trouvé");
           return;
         }
 
         // Récupérer les questions QCM associées au document
-        const { data: questionsData, error: questionsError } = await supabase
-          .from('qcm_questions')
-          .select(`
-            *,
-            users_questions!inner (
-              user_id
-            )
-          `)
-          .eq('document_id', documentId)
-          .eq('users_questions.user_id', userData.user.id);
+        try {
+          const questionsData = await qcmService.getQuestionsForUser(documentId, currentUser.id);
 
-        if (questionsError) {
-          console.error("Erreur lors de la récupération des questions:", questionsError);
-          throw questionsError;
-        }
-
-        console.log("Questions récupérées:", questionsData);
-        
-        if (questionsData && questionsData.length > 0) {
-          // Récupérer les choix pour chaque question
-          const questionIds = questionsData.map(q => q.id);
+          console.log("Questions récupérées:", questionsData);
           
-          const { data: choicesData, error: choicesError } = await supabase
-            .from('qcm_choices')
-            .select('*')
-            .in('question_id', questionIds);
+          if (questionsData && questionsData.length > 0) {
+            // Récupérer les choix pour chaque question
+            const questionIds = questionsData.map(q => q.id);
+            const choicesByQuestion = await qcmService.getChoicesForQuestions(questionIds);
             
-          if (choicesError) {
-            console.error("Erreur lors de la récupération des choix:", choicesError);
-            throw choicesError;
+            console.log("Choix récupérés:", choicesByQuestion);
+            setQuestionChoices(choicesByQuestion);
+            
+            // Si l'utilisateur a déjà un score, mettre à jour le total
+            if (existingScore !== null) {
+              setScore(prev => ({
+                ...prev,
+                total: questionsData.length
+              }));
+            }
           }
-          
-          console.log("Choix récupérés:", choicesData);
-          
-          // Organiser les choix par question_id
-          const choicesByQuestion: Record<string, Choice[]> = {};
-          
-          if (choicesData) {
-            console.log("Exemple de choix:", choicesData[0]);
-            choicesData.forEach((choice: Choice) => {
-              console.log(`Choix ${choice.id}: ${choice.choice}`);
-              if (!choicesByQuestion[choice.question_id]) {
-                choicesByQuestion[choice.question_id] = [];
-              }
-              choicesByQuestion[choice.question_id].push(choice);
-            });
-          }
-          
-          setQuestionChoices(choicesByQuestion);
-          
-          // Si l'utilisateur a déjà un score, mettre à jour le total
-          if (hasExistingScore) {
-            setScore(prev => ({
-              ...prev,
-              total: questionsData.length
-            }));
-          }
+
+          setQuestions(questionsData || []);
+        } catch (questionsError) {
+          console.error('Erreur lors de la récupération des questions:', questionsError);
+          setError("Erreur lors de la récupération des questions QCM");
+          return;
         }
 
         setDocument(documentData);
-        setQuestions(questionsData || []);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching document and questions:', error);
+        setError(error.message || "Une erreur est survenue lors du chargement du document");
       } finally {
         setIsLoading(false);
       }
     }
 
     fetchDocumentAndQuestions();
-  }, [supabase, router, documentId, hasExistingScore]);
+  }, [documentService, qcmService, userService, router, documentId, existingScore]);
 
   const handleAnswerSelect = (questionId: string, choiceId: string) => {
     setSelectedAnswers(prev => ({
@@ -183,108 +122,32 @@ export default function DocumentQCMPage() {
 
   const handleSubmit = async () => {
     // Vérifier si toutes les questions ont une réponse
-    const answeredQuestions = Object.keys(selectedAnswers).length;
-    if (answeredQuestions < questions.length) {
+    if (!qcmService.validateAnswers(questions, selectedAnswers)) {
+      const answeredQuestions = Object.keys(selectedAnswers).length;
       alert(`Veuillez répondre à toutes les questions. (${answeredQuestions}/${questions.length})`);
       return;
     }
 
     try {
-      // Calculer le score
-      let correctAnswers = 0;
-      questions.forEach(question => {
-        const selectedChoiceId = selectedAnswers[question.id];
-        if (selectedChoiceId) {
-          const selectedChoice = questionChoices[question.id]?.find(c => c.id === selectedChoiceId);
-          if (selectedChoice?.is_correct) {
-            correctAnswers++;
-          }
-        }
-      });
-
-      const percentage = (correctAnswers / questions.length) * 100;
+      const currentUser = await userService.getCurrentUser();
       
-      // Récupérer l'utilisateur actuel
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      
-      if (userError || !userData.user) {
-        console.error("Erreur lors de la récupération de l'utilisateur:", userError);
+      if (!currentUser) {
         throw new Error("Vous devez être connecté pour soumettre vos réponses");
       }
+
+      // Calculer le score
+      const calculatedScore = qcmService.calculateScore(questions, questionChoices, selectedAnswers);
       
-      // Enregistrer le score dans la table employees_documents
-      console.log("Tentative d'enregistrement du score:", {
-        score: percentage,
-        employee_id: userData.user.id,
-        document_id: documentId
-      });
-
-      const { data: updateData, error: updateError } = await supabase
-        .from('employees_documents')
-        .update({ score: percentage })
-        .match({ 
-          employee_id: userData.user.id,
-          document_id: documentId
-        })
-        .select();
-
-      console.log("Résultat de la mise à jour:", { updateData, updateError });
-      
-      if (updateError) {
-        console.error("Erreur lors de l'enregistrement du score:", updateError);
-        throw new Error("Erreur lors de l'enregistrement du score");
-      }
-
-      // Vérifier si la mise à jour a affecté des lignes
-      if (!updateData || updateData.length === 0) {
-        console.warn("Aucune ligne mise à jour. Vérification de l'existence de l'enregistrement...");
-        
-        // Vérifier si l'enregistrement existe
-        const { data: checkData, error: checkError } = await supabase
-          .from('employees_documents')
-          .select('*')
-          .match({ 
-            employee_id: userData.user.id,
-            document_id: documentId
-          });
-          
-        console.log("Vérification de l'enregistrement:", { checkData, checkError });
-        
-        if (checkError) {
-          console.error("Erreur lors de la vérification de l'enregistrement:", checkError);
-        } else if (!checkData || checkData.length === 0) {
-          console.warn("L'enregistrement n'existe pas, tentative d'insertion...");
-          
-          // Si l'enregistrement n'existe pas, l'insérer
-          const { data: insertData, error: insertError } = await supabase
-            .from('employees_documents')
-            .insert([{ 
-              employee_id: userData.user.id,
-              document_id: documentId,
-              score: percentage
-            }])
-            .select();
-            
-            console.log("Résultat de l'insertion:", { insertData, insertError });
-            
-            if (insertError) {
-              console.error("Erreur lors de l'insertion du score:", insertError);
-              throw new Error("Erreur lors de l'insertion du score");
-            }
-        }
-      }
+      // Enregistrer le score
+      await documentService.saveUserScore(documentId, currentUser.id, calculatedScore.percentage);
       
       // Mettre à jour l'état local
-      setScore({
-        correct: correctAnswers,
-        total: questions.length,
-        percentage
-      });
+      setScore(calculatedScore);
       setShowResults(true);
-      setHasExistingScore(true);
+      setExistingScore(calculatedScore.percentage);
       
       // Afficher un message de succès
-      alert(`Votre score a été enregistré : ${correctAnswers}/${questions.length} (${percentage.toFixed(2)}%)`);
+      alert(`Votre score a été enregistré : ${calculatedScore.correct}/${calculatedScore.total} (${calculatedScore.percentage.toFixed(2)}%)`);
       
     } catch (error: any) {
       console.error("Erreur lors de la soumission des réponses:", error);
@@ -340,6 +203,27 @@ export default function DocumentQCMPage() {
 
       {isLoading ? (
         <div className="text-center">Chargement du test QCM...</div>
+      ) : error ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-8">
+            <FileText className="h-12 w-12 text-red-400 mb-4" />
+            <p className="text-lg font-medium text-gray-900 mb-2">Erreur</p>
+            <p className="text-sm text-gray-600 mb-4 text-center">{error}</p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => router.push('/documents')}
+              >
+                Retour aux documents
+              </Button>
+              <Button
+                onClick={() => window.location.reload()}
+              >
+                Réessayer
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       ) : !document ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-8">
@@ -397,7 +281,7 @@ export default function DocumentQCMPage() {
                   </p>
                 </CardContent>
               </Card>
-            ) : hasExistingScore || showResults ? (
+            ) : existingScore !== null || showResults ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-8">
                   <div className="text-center">
@@ -477,7 +361,7 @@ export default function DocumentQCMPage() {
               </div>
             )}
 
-            {showResults && !hasExistingScore && (
+            {showResults && existingScore === null && (
               <Card className="mt-6">
                 <CardHeader>
                   <CardTitle>Résultats du QCM</CardTitle>

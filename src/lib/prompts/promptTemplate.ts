@@ -16,7 +16,6 @@ export const qcmPromptTemplate = (text: string, title: string, summary: string, 
 3. **Output format (JSON):**  
    - The result must be returned in a structured JSON format as follows:  
 
-\`\`\`json
 {
   "qcm": [
     {
@@ -41,12 +40,12 @@ export const qcmPromptTemplate = (text: string, title: string, summary: string, 
     }
   ]
 }
-\`\`\`
 
 Important Notes:
 - The AI must automatically detect the language of the provided text and generate the questions accordingly.
 - The instruction must always remain in English, regardless of the text language.
 - The justification should explain why the correct answer is valid, using an extract from the text or a short clarification.
+- Return ONLY the JSON object, no additional text, markdown, or code blocks.
 
 Input:
 Here is the full text to analyze and transform into a quiz:
