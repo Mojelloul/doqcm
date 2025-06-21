@@ -93,28 +93,43 @@ export function RegisterForm() {
         throw new Error("Erreur lors de la création du compte: pas d'ID utilisateur");
       }
 
-      // Ajouter les informations dans la table users
+      // Attendre un peu pour que le trigger handle_new_user() s'exécute
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Vérifier si l'utilisateur a été créé dans la table users par le trigger
       const { data: userData, error: userError } = await supabase
         .from("users")
-        .insert([
-          {
-            id: authData.user.id,
-            name: values.name,
-            email: values.email
-          },
-        ])
-        .select()
+        .select("id, name, email, role")
+        .eq("id", authData.user.id)
         .single();
 
       if (userError) {
-        console.error("Erreur lors de l'insertion:", userError);
-        if (userError.code === "23505") {
-          throw new Error("Cette adresse email est déjà utilisée.");
-        }
-        throw new Error(`Erreur base de données: ${userError.message}`);
+        console.error("Erreur lors de la vérification de l'utilisateur:", userError);
+        throw new Error("Erreur lors de la création du compte utilisateur");
       }
 
-      // Redirection simple vers le dashboard après inscription
+      if (userData) {
+        console.log("Utilisateur créé avec succès par le trigger:", userData);
+        
+        // Mettre à jour les informations si nécessaire (nom, email, rôle)
+        if (userData.name !== values.name || userData.email !== values.email || userData.role !== 'employee') {
+          const { error: updateError } = await supabase
+            .from("users")
+            .update({
+              name: values.name,
+              email: values.email,
+              role: 'employee'
+            })
+            .eq("id", authData.user.id);
+
+          if (updateError) {
+            console.error("Erreur lors de la mise à jour:", updateError);
+            // Ne pas faire échouer l'inscription pour une erreur de mise à jour
+          }
+        }
+      }
+
+      // Redirection vers le dashboard après inscription
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Erreur d'inscription:", error);
