@@ -4,7 +4,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { X, FileText, AlertTriangle, AlertCircle } from "lucide-react";
+import { X, FileText, AlertTriangle, AlertCircle, Image as ImageIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useServices } from "@/lib/hooks/useServices";
 
@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ImageUploadOCR } from "./ImageUploadOCR";
 
 const formSchema = z.object({
   title: z.string().min(1, {
@@ -50,6 +51,7 @@ export function TextAnalysisForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [emails, setEmails] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [showImageUpload, setShowImageUpload] = useState(false);
   const { userService, documentService, qcmService } = useServices();
   const router = useRouter();
 
@@ -90,6 +92,12 @@ export function TextAnalysisForm() {
 
   const removeEmail = (emailToRemove: string) => {
     setEmails(emails.filter(email => email !== emailToRemove));
+  };
+
+  const handleTextExtracted = (extractedText: string) => {
+    const currentText = form.getValues("text");
+    const newText = currentText ? `${currentText}\n\n${extractedText}` : extractedText;
+    form.setValue("text", newText);
   };
 
   async function onSubmit(values: FormData) {
@@ -255,7 +263,29 @@ export function TextAnalysisForm() {
               name="text"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contenu du document</FormLabel>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Contenu du document</FormLabel>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowImageUpload(!showImageUpload)}
+                      className="flex items-center gap-2"
+                    >
+                      <ImageIcon className="h-4 w-4" />
+                      {showImageUpload ? "Masquer" : "Ajouter du texte depuis une image"}
+                    </Button>
+                  </div>
+                  
+                  {showImageUpload && (
+                    <div className="mb-4">
+                      <ImageUploadOCR 
+                        onTextExtracted={handleTextExtracted}
+                        disabled={isLoading}
+                      />
+                    </div>
+                  )}
+                  
                   <FormControl>
                     <Textarea
                       placeholder="Insérez le contenu à analyser... (entre 100 et 3000 caractères)"
