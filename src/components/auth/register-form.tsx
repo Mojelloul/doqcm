@@ -42,6 +42,7 @@ type FormData = z.infer<typeof formSchema>;
 export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const router = useRouter();
   const { supabase } = useSupabaseContext();
 
@@ -130,13 +131,31 @@ export function RegisterForm() {
       }
 
       // Redirection vers le dashboard après inscription
-      router.push("/dashboard");
+      // router.push("/dashboard");
+      setIsSubmitted(true);
     } catch (error: any) {
       console.error("Erreur d'inscription:", error);
       setError(error?.message || "Une erreur est survenue lors de l'inscription");
     } finally {
       setIsLoading(false);
     }
+  }
+
+  if (isSubmitted) {
+    return (
+      <Card>
+        <CardHeader>
+          <h3 className="text-2xl font-semibold">Vérifiez vos e-mails</h3>
+        </CardHeader>
+        <CardContent>
+          <p>Inscription réussie !</p>
+          <p>
+            Nous vous avons envoyé un lien de confirmation à votre adresse e-mail.
+            Veuillez cliquer sur ce lien pour activer votre compte.
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
