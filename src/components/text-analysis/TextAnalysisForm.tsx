@@ -7,6 +7,7 @@ import * as z from "zod";
 import { X, FileText, AlertTriangle, AlertCircle, Image as ImageIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useServices } from "@/lib/hooks/useServices";
+import { calculateNumberOfQuestions } from "@/lib/utils/qcm";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,8 +33,8 @@ const formSchema = z.object({
   }),
   text: z.string().min(100, {
     message: "Le texte doit contenir au moins 100 caractères.",
-  }).max(3000, {
-    message: "Le texte ne doit pas dépasser 3000 caractères.",
+  }).max(5000, {
+    message: "Le texte ne doit pas dépasser 5000 caractères.",
   }),
   summary: z.string().max(250, {
     message: "Le résumé ne doit pas dépasser 250 caractères.",
@@ -74,8 +75,8 @@ export function TextAnalysisForm() {
       event.preventDefault();
       setError(null); // Réinitialiser les erreurs
       
-      if (emails.length >= 3) {
-        setError("Vous ne pouvez pas ajouter plus de 3 emails");
+      if (emails.length >= 20) {
+        setError("Vous ne pouvez pas ajouter plus de 20 emails");
         return;
       }
       if (value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
@@ -132,8 +133,17 @@ export function TextAnalysisForm() {
         throw new Error("Aucun utilisateur trouvé avec les emails fournis");
       }
 
+      // Calculer le nombre de questions basé sur le nombre de destinataires
+      const numberOfQuestions = calculateNumberOfQuestions(existingUsers.length);
+      console.log(`Génération de QCM avec ${numberOfQuestions} questions pour ${existingUsers.length} destinataires`);
+
       // Générer le QCM avec l'IA
-      const qcmResult = await qcmService.generateQCMFromText(values.text, values.title, values.summary);
+      const qcmResult = await qcmService.generateQCMFromText(
+        values.text, 
+        values.title, 
+        values.summary, 
+        numberOfQuestions
+      );
       
       if (!qcmResult || !qcmResult.qcm || qcmResult.qcm.length === 0) {
         throw new Error("Erreur lors de la génération du QCM par l'IA");
@@ -288,13 +298,13 @@ export function TextAnalysisForm() {
                   
                   <FormControl>
                     <Textarea
-                      placeholder="Insérez le contenu à analyser... (entre 100 et 3000 caractères)"
+                      placeholder="Insérez le contenu à analyser... (entre 100 et 10000 caractères)"
                       className="min-h-[200px]"
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    {field.value.length}/3000 caractères
+                    {field.value.length}/5000 caractères
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -345,15 +355,15 @@ export function TextAnalysisForm() {
                       <FormControl>
                         <Input
                           {...field}
-                          placeholder={emails.length >= 3 ? "Nombre maximum de destinataires atteint" : "Ajoutez les adresses email (appuyez sur Entrée ou virgule pour valider)"}
+                          placeholder={emails.length >= 20 ? "Nombre maximum de destinataires atteint" : "Ajoutez les adresses email (appuyez sur Entrée ou virgule pour valider)"}
                           onKeyDown={handleEmailKeyDown}
                           className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                          disabled={emails.length >= 3}
+                          disabled={emails.length >= 20}
                         />
                       </FormControl>
                     </div>
                     <FormDescription>
-                      {emails.length}/3 destinataires ajoutés
+                      {emails.length}/20 destinataires ajoutés
                     </FormDescription>
                     <FormMessage />
                   </div>

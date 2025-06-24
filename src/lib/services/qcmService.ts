@@ -311,12 +311,17 @@ export class QCMService {
   }
 
   /**
-   * Génère un QCM à partir d'un texte avec l'IA
+   * Génère un QCM à partir d'un texte en utilisant l'IA
    */
-  async generateQCMFromText(text: string, title: string, summary: string): Promise<QCMResponse> {
+  async generateQCMFromText(
+    text: string, 
+    title: string, 
+    summary: string, 
+    numberOfQuestions: number = 6
+  ): Promise<QCMResponse> {
     try {
-      console.log("QCMService: Starting QCM generation for document:", title);
-      const result = await this.aiService.generateQCMFromText(text, title, summary);
+      console.log("QCMService: Starting QCM generation for document:", title, "with", numberOfQuestions, "questions");
+      const result = await this.aiService.generateQCMFromText(text, title, summary, numberOfQuestions);
       console.log("QCMService: QCM generation completed successfully");
       return result;
     } catch (error) {
@@ -443,7 +448,7 @@ export class QCMService {
   }
 
   /**
-   * Crée des questions pour des utilisateurs (sélection aléatoire)
+   * Crée des questions pour des utilisateurs (sélection aléatoire sans doublons par utilisateur)
    */
   async assignQuestionsToUsers(
     questions: Array<{ id: string }>, 
@@ -451,11 +456,19 @@ export class QCMService {
     questionsPerUser: number = 3
   ): Promise<void> {
     const questionsForUsers = users.map((user) => {
-      // Mélanger les questions et prendre les premières
-      const shuffledQuestions = [...questions].sort(() => Math.random() - 0.5).slice(0, questionsPerUser);
+      // Sélection aléatoire sans doublons pour le même utilisateur
+      const selectedQuestions = [];
+      const availableQuestions = [...questions]; // Copie pour ne pas modifier l'original
+      
+      for (let i = 0; i < questionsPerUser && availableQuestions.length > 0; i++) {
+        const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+        selectedQuestions.push(availableQuestions[randomIndex]);
+        // Retirer la question sélectionnée pour éviter les doublons pour cet utilisateur
+        availableQuestions.splice(randomIndex, 1);
+      }
       
       // Créer les entrées pour users_questions
-      return shuffledQuestions.map(question => ({
+      return selectedQuestions.map(question => ({
         user_id: user.id,
         question_id: question.id
       }));
