@@ -161,7 +161,7 @@ export class AIService {
     text: string, 
     title: string, 
     summary: string, 
-    numberOfQuestions: number = 3,
+    numberOfQuestions: number = 5,
     config?: Partial<AIGenerationConfig>
   ): Promise<QCMGenerationResult> {
     try {

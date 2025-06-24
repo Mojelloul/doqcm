@@ -42,4 +42,11 @@ export {
   formatHtml,
   formatDisplayText,
   formatStats
-} from './formatting'; 
+} from './formatting';
+
+// Export des utilitaires QCM
+export {
+  calculateNumberOfQuestions,
+  validateRecipientCount,
+  getQuestionCountMessage
+} from './qcm'; 

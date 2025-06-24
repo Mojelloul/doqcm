@@ -153,7 +153,7 @@ export function validateScore(score: number): { isValid: boolean; message?: stri
 }
 
 // Validation de liste d'emails
-export function validateEmailList(emails: string[], maxEmails: number = 10): { isValid: boolean; message?: string; invalidEmails: string[] } {
+export function validateEmailList(emails: string[], maxEmails: number = 20): { isValid: boolean; message?: string; invalidEmails: string[] } {
   if (emails.length === 0) {
     return {
       isValid: false,
