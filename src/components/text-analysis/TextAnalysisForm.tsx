@@ -246,13 +246,13 @@ export function TextAnalysisForm() {
   }
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle>Création d'un nouveau document</CardTitle>
+    <Card className="w-full max-w-sm sm:max-w-2xl lg:max-w-4xl mx-auto p-2 sm:p-6">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 pb-2 gap-2">
+        <CardTitle className="text-lg sm:text-xl">Création d'un nouveau document</CardTitle>
         <Button
           variant="outline"
           onClick={() => router.push('/documents')}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 w-full sm:w-auto"
         >
           <FileText className="h-4 w-4" />
           Gérer mes documents
@@ -260,7 +260,7 @@ export function TextAnalysisForm() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -286,14 +286,14 @@ export function TextAnalysisForm() {
               name="text"
               render={({ field }) => (
                 <FormItem>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <FormLabel>Contenu du document</FormLabel>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => setShowImageUpload(!showImageUpload)}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 w-full sm:w-auto"
                     >
                       <ImageIcon className="h-4 w-4" />
                       {showImageUpload ? "Masquer" : "Ajouter du texte depuis une image"}
@@ -311,7 +311,7 @@ export function TextAnalysisForm() {
                   
                   <FormControl>
                     <Textarea
-                      placeholder="Insérez le contenu à analyser... (entre 100 et 10000 caractères)"
+                      placeholder="Insérez le contenu à analyser..."
                       className="min-h-[200px]"
                       {...field}
                     />
@@ -332,7 +332,7 @@ export function TextAnalysisForm() {
                   <FormLabel>Synthèse du document</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Résumez les points clés de votre document... (maximum 250 caractères)"
+                      placeholder="Résumez les points clés de votre document..."
                       className="min-h-[100px]"
                       {...field}
                     />
@@ -368,7 +368,7 @@ export function TextAnalysisForm() {
                       <FormControl>
                         <Input
                           {...field}
-                          placeholder={emails.length >= 20 ? "Nombre maximum de destinataires atteint" : "Ajoutez les adresses email (appuyez sur Entrée ou virgule pour valider)"}
+                          placeholder={emails.length >= 20 ? "Nombre maximum de destinataires atteint" : "Ajoutez des emails (Entrée ou ,)"}
                           onKeyDown={handleEmailKeyDown}
                           className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                           disabled={emails.length >= 20}
@@ -400,8 +400,7 @@ export function TextAnalysisForm() {
                       Traitement par intelligence artificielle
                     </FormLabel>
                     <FormDescription>
-                      En validant cette option, vous autorisez le traitement de votre document par notre service d'analyse IA.
-                      Consultez notre <a href="/privacy" className="underline" target="_blank">politique de confidentialité</a> pour plus de détails.
+                      J'accepte l'analyse IA. <a href="/privacy" className="underline" target="_blank">Politique de confidentialité</a>
                     </FormDescription>
                   </div>
                   <FormMessage />
@@ -411,7 +410,7 @@ export function TextAnalysisForm() {
 
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full py-3 text-base mt-2" 
               disabled={isLoading || isSubmitted}
             >
               {isLoading ? "Traitement en cours..." : isSubmitted ? "Document créé avec succès" : "Créer le document"}

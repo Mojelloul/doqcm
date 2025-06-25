@@ -20,12 +20,12 @@ export default function DashboardPage() {
   }, [supabase]);
 
   return (
-    <div className="container px-4 sm:px-6 py-10">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="container px-2 sm:px-4 py-4 max-w-lg md:max-w-5xl mx-auto">
+      <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
           <TextAnalysisForm />
         </div>
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 mt-6 lg:mt-0">
           {userId && <SubscriptionInfo userId={userId} />}
         </div>
       </div>
