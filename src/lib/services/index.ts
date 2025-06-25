@@ -1,13 +1,14 @@
 // Export des services
-export { UserService } from './userService';
-export { DocumentService } from './documentService';
-export { QCMService } from './qcmService';
-export { AIService } from './aiService';
-export { ConfigService } from './configService';
-export { UtilityService } from './utilityService';
-export { ErrorHandler, errorHandler } from './errorHandler';
-export { CacheService, cacheService } from './cacheService';
-export { NotificationService, notificationService } from './notificationService';
+export * from './aiService';
+export * from './cacheService';
+export * from './configService';
+export * from './documentService';
+export * from './errorHandler';
+export * from './notificationService';
+export * from './qcmService';
+export * from './userService';
+export * from './utilityService';
+export * from './subscriptionService';
 
 // Export des types
 export type { User, UserData, UserStats, UserSession, AuthData, EmailValidation } from '../types/user';

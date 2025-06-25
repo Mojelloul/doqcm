@@ -22,9 +22,14 @@ import {
 } from '../types/document';
 import { User } from '../types/user';
 import { Question } from '../types/qcm';
+import { SubscriptionService } from './subscriptionService';
 
 export class DocumentService {
-  constructor(private supabase: SupabaseClient) {}
+  private subscriptionService: SubscriptionService;
+
+  constructor(private supabase: SupabaseClient) {
+    this.subscriptionService = new SubscriptionService(supabase);
+  }
 
   /**
    * Récupère tous les documents d'un utilisateur
@@ -187,6 +192,25 @@ export class DocumentService {
         owner_id: documentData.owner_id
       });
 
+      // Vérifier les permissions d'abonnement
+      const canCreate = await this.subscriptionService.canCreateDocument(documentData.owner_id);
+      
+      if (!canCreate.canCreate) {
+        throw new Error(`Impossible de créer le document: ${canCreate.reason}`);
+      }
+
+      // Vérifier les limites de contenu et de destinataires
+      const contentLength = documentData.content.length;
+      const validation = await this.subscriptionService.validateDocumentCreation(
+        documentData.owner_id, 
+        contentLength, 
+        0 // Pour l'instant, on ne connaît pas encore le nombre de destinataires
+      );
+
+      if (!validation.isValid) {
+        throw new Error(`Validation échouée: ${validation.reason}`);
+      }
+
       const { data: document, error } = await this.supabase
         .from("documents")
         .insert([documentData])
@@ -209,6 +233,9 @@ export class DocumentService {
       if (!document) {
         throw new Error("Erreur lors de la création du document: Aucun document retourné");
       }
+
+      // Incrémenter l'utilisation quotidienne
+      await this.subscriptionService.incrementDailyUsage(documentData.owner_id);
 
       console.log("DocumentService.createDocument - Document créé avec succès:", document.id);
       return document;
@@ -267,15 +294,26 @@ export class DocumentService {
     }
 
     try {
-      // Vérifier que le document existe
+      // Vérifier que le document existe et obtenir l'owner_id
       const { data: document, error: docError } = await this.supabase
         .from('documents')
-        .select('id')
+        .select('id, owner_id')
         .eq('id', documentId)
         .single();
 
       if (docError || !document) {
         throw new Error('Document non trouvé');
+      }
+
+      // Vérifier les limites de destinataires selon l'abonnement
+      const validation = await this.subscriptionService.validateDocumentCreation(
+        document.owner_id,
+        0, // On ne vérifie pas la taille du contenu ici
+        userIds.length
+      );
+
+      if (!validation.isValid) {
+        throw new Error(`Limite de destinataires dépassée: ${validation.reason}`);
       }
 
       // Préparer les données de partage (sans le champ permissions)

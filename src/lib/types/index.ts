@@ -224,4 +224,11 @@ export interface ExportData {
   headers: string[];
   rows: any[][];
   metadata?: Record<string, any>;
-} 
+}
+
+// ============================================================================
+// TYPES D'ABONNEMENT
+// ============================================================================
+
+// Ré-export des types d'abonnement
+export * from './subscription'; 

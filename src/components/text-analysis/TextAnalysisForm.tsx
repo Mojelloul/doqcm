@@ -8,6 +8,8 @@ import { X, FileText, AlertTriangle, AlertCircle, Image as ImageIcon } from "luc
 import { useRouter } from "next/navigation";
 import { useServices } from "@/lib/hooks/useServices";
 import { calculateNumberOfQuestions } from "@/lib/utils/qcm";
+import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
+import { SubscriptionService } from "@/lib/services/subscriptionService";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -54,6 +56,7 @@ export function TextAnalysisForm() {
   const [error, setError] = useState<string | null>(null);
   const [showImageUpload, setShowImageUpload] = useState(false);
   const { userService, documentService, qcmService } = useServices();
+  const { supabase } = useSupabaseContext();
   const router = useRouter();
 
   const form = useForm<FormData>({
@@ -110,6 +113,16 @@ export function TextAnalysisForm() {
       
       if (!currentUser) {
         throw new Error("Vous devez être connecté pour créer un document");
+      }
+
+      // VÉRIFICATION DES ABONNEMENTS - NOUVEAU
+      const subscriptionService = new SubscriptionService(supabase);
+      
+      // Vérifier si l'utilisateur peut créer un document
+      const canCreate = await subscriptionService.canCreateDocument(currentUser.id);
+      
+      if (!canCreate.canCreate) {
+        throw new Error(`Impossible de créer un document: ${canCreate.reason}`);
       }
 
       // Vérifier si des emails ont été fournis

@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
+  images: {
+    domains: ['localhost'],
+  },
+  // Configuration pour les polices
+  optimizeFonts: true,
 };
 
 export default nextConfig;
