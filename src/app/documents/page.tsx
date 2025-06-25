@@ -100,18 +100,18 @@ export default function DocumentsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           {documents.map((doc) => (
-            <Card key={doc.id} className="group hover:shadow-lg transition-all duration-200 flex flex-col rounded-xl border border-gray-200 bg-white/90">
-              <CardHeader className="space-y-1 p-4 pb-2">
-                <CardTitle className="line-clamp-2 text-base sm:text-lg font-semibold group-hover:text-primary transition-colors">
+            <Card key={doc.id} className="group hover:shadow-lg transition-all duration-200 flex flex-col rounded-xl border border-gray-200 bg-white/90 dark:bg-gray-900 dark:border-gray-700">
+              <CardHeader className="space-y-1 p-4 pb-2 dark:bg-gray-900">
+                <CardTitle className="line-clamp-2 text-base sm:text-lg font-semibold group-hover:text-primary transition-colors dark:text-gray-100">
                   {doc.title}
                 </CardTitle>
-                <CardDescription className="flex items-center gap-2 text-xs sm:text-sm">
+                <CardDescription className="flex items-center gap-2 text-xs sm:text-sm dark:text-gray-300">
                   <Calendar className="h-4 w-4" />
                   {format(new Date(doc.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col p-4 pt-2">
-                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-3 mb-4">
+              <CardContent className="flex-1 flex flex-col p-4 pt-2 dark:bg-gray-900">
+                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-3 mb-4 dark:text-gray-300">
                   {doc.summary || "Aucun résumé disponible"}
                 </p>
                 <Button 

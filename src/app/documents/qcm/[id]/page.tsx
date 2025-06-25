@@ -157,46 +157,36 @@ export default function DocumentQCMPage() {
 
   const getChoiceClassName = (questionId: string, choiceId: string) => {
     const isSelected = selectedAnswers[questionId] === choiceId;
-    
     if (!showResults) {
       return `flex items-center gap-3 p-4 border rounded-md transition-colors ${
-        isSelected ? 'bg-blue-50 border-blue-300 shadow-sm' : 'hover:bg-gray-50'
+        isSelected ? 'bg-blue-50 border-blue-300 shadow-sm dark:bg-blue-900' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
       }`;
     }
-    
     const choice = questionChoices[questionId]?.find(c => c.id === choiceId);
     const isCorrect = choice?.is_correct;
-    
     if (isSelected && isCorrect) {
-      return 'flex items-center gap-3 p-4 border rounded-md bg-green-50 border-green-500 shadow-sm';
+      return 'flex items-center gap-3 p-4 border rounded-md bg-green-50 border-green-500 shadow-sm dark:bg-green-900';
     } else if (isSelected && !isCorrect) {
-      return 'flex items-center gap-3 p-4 border rounded-md bg-red-50 border-red-500 shadow-sm';
+      return 'flex items-center gap-3 p-4 border rounded-md bg-red-50 border-red-500 shadow-sm dark:bg-red-900';
     } else if (!isSelected && isCorrect) {
-      return 'flex items-center gap-3 p-4 border rounded-md bg-green-50 border-green-500 opacity-70';
+      return 'flex items-center gap-3 p-4 border rounded-md bg-green-50 border-green-500 opacity-70 dark:bg-green-900';
     } else {
-      return 'flex items-center gap-3 p-4 border rounded-md';
+      return 'flex items-center gap-3 p-4 border rounded-md hover:bg-gray-50 dark:hover:bg-gray-800';
     }
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-8">
+    <div className="container mx-auto px-2 sm:px-6 py-6 max-w-2xl lg:max-w-4xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Test QCM du Document</h1>
+        <h1 className="text-lg sm:text-2xl font-bold">Test QCM du Document</h1>
         <div className="flex gap-4">
           <Button
             variant="outline"
             onClick={() => router.back()}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 w-full sm:w-auto"
           >
             <ArrowLeft className="h-4 w-4" />
             Retour
-          </Button>
-          <Button
-            onClick={() => router.push('/dashboard')}
-            className="flex items-center gap-2"
-          >
-            <Home className="h-4 w-4" />
-            Accueil
           </Button>
         </div>
       </div>
@@ -213,11 +203,13 @@ export default function DocumentQCMPage() {
               <Button
                 variant="outline"
                 onClick={() => router.push('/documents')}
+                className="w-full sm:w-auto py-2 text-base"
               >
                 Retour aux documents
               </Button>
               <Button
                 onClick={() => window.location.reload()}
+                className="w-full sm:w-auto py-2 text-base"
               >
                 Réessayer
               </Button>
@@ -231,7 +223,7 @@ export default function DocumentQCMPage() {
             <p className="text-lg font-medium text-gray-900">Document non trouvé</p>
             <Button
               onClick={() => router.push('/documents')}
-              className="mt-4"
+              className="mt-4 w-full sm:w-auto py-2 text-base"
             >
               Retour aux documents
             </Button>
@@ -239,26 +231,26 @@ export default function DocumentQCMPage() {
         </Card>
       ) : (
         <>
-          <Card className="mb-8 shadow-md">
-            <CardHeader className="border-b bg-gray-50">
-              <CardTitle className="text-xl text-blue-800">{document.title}</CardTitle>
-              <CardDescription className="flex items-center gap-2 text-gray-600">
+          <Card className="mb-8 shadow-md rounded-xl border border-gray-200 bg-white/90 dark:bg-gray-900 dark:border-gray-700">
+            <CardHeader className="border-b bg-gray-50 rounded-t-xl p-4 pb-2 dark:bg-gray-900">
+              <CardTitle className="text-base sm:text-xl text-blue-800 dark:text-blue-200">{document.title}</CardTitle>
+              <CardDescription className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
                 Créé le {format(new Date(document.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
               </CardDescription>
             </CardHeader>
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 p-4 dark:bg-gray-900">
               {document.summary && (
-                <div className="mb-6 bg-blue-50 p-4 rounded-md border border-blue-100">
-                  <h3 className="text-md font-semibold text-blue-800 mb-2">points importants</h3>
-                  <p className="text-gray-700 italic">{document.summary}</p>
+                <div className="mb-6 bg-blue-50 p-4 rounded-md border border-blue-100 dark:bg-blue-950 dark:border-blue-900">
+                  <h3 className="text-sm sm:text-md font-semibold text-blue-800 dark:text-blue-200 mb-2">Points importants</h3>
+                  <p className="text-gray-700 italic text-sm sm:text-base dark:text-gray-200">{document.summary}</p>
                 </div>
               )}
               <div className="mt-4">
-                <h3 className="text-md font-semibold text-gray-800 mb-2">Contenu du document</h3>
-                <div className="prose max-w-none">
+                <h3 className="text-sm sm:text-md font-semibold text-gray-800 dark:text-gray-100 mb-2">Contenu du document</h3>
+                <div className="prose max-w-none dark:text-gray-200">
                   {document.content.split('\n').map((paragraph, index) => (
                     paragraph.trim() ? (
-                      <p key={index} className="mb-4 text-gray-700 leading-relaxed">
+                      <p key={index} className="mb-4 text-gray-700 leading-relaxed text-sm sm:text-base dark:text-gray-200">
                         {paragraph}
                       </p>
                     ) : null
@@ -269,7 +261,7 @@ export default function DocumentQCMPage() {
           </Card>
 
           <div className="border-t border-gray-200 my-8 pt-8">
-            <h2 className="text-xl font-semibold mb-4 text-blue-800">Questions du QCM</h2>
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-blue-800">Questions du QCM</h2>
 
             {questions.length === 0 ? (
               <Card>
@@ -289,9 +281,9 @@ export default function DocumentQCMPage() {
                     <p className="text-sm text-gray-500 mb-6">
                       Votre score: {score.percentage.toFixed(2)}%
                     </p>
-                    <div className="w-full max-w-md mx-auto bg-gray-200 rounded-full h-4 mb-6">
+                    <div className="w-full max-w-xs sm:max-w-md mx-auto bg-gray-200 rounded-full h-5 mb-6">
                       <div 
-                        className={`h-4 rounded-full ${
+                        className={`h-5 rounded-full ${
                           score.percentage >= 80 ? 'bg-green-500' : 
                           score.percentage >= 50 ? 'bg-yellow-500' : 
                           'bg-red-500'
@@ -301,7 +293,7 @@ export default function DocumentQCMPage() {
                     </div>
                     <Button 
                       variant="outline" 
-                      className="mx-auto"
+                      className="mx-auto w-full sm:w-auto py-2 text-base"
                       onClick={() => router.push('/dashboard')}
                     >
                       Retour à l'accueil
@@ -310,14 +302,14 @@ export default function DocumentQCMPage() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {questions.map((question, index) => (
-                  <Card key={question.id}>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Question {index + 1}</CardTitle>
+                  <Card key={question.id} className="rounded-xl border border-gray-200 bg-white/90 dark:bg-gray-900 dark:border-gray-700">
+                    <CardHeader className="p-4 pb-2 dark:bg-gray-900">
+                      <CardTitle className="text-base sm:text-lg dark:text-blue-200">Question {index + 1}</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <p className="font-medium mb-4">{question.question}</p>
+                    <CardContent className="p-4 pt-2 dark:bg-gray-900">
+                      <p className="font-medium mb-4 text-sm sm:text-base dark:text-gray-100">{question.question}</p>
                       <div className="space-y-2">
                         {questionChoices[question.id] && questionChoices[question.id].map((choice, choiceIndex) => (
                           <div 
@@ -337,8 +329,8 @@ export default function DocumentQCMPage() {
                               htmlFor={`choice-${choice.id}`} 
                               className="flex-grow cursor-pointer"
                             >
-                              <span className="block text-base font-medium text-gray-800">
-                                <span className="inline-block w-6 text-center mr-2 text-gray-500">{choiceIndex + 1}.</span>
+                              <span className="block text-sm sm:text-base font-medium text-gray-800 dark:text-gray-100">
+                                <span className="inline-block w-6 text-center mr-2 text-gray-500 dark:text-gray-400">{choiceIndex + 1}.</span>
                                 {choice.choice}
                               </span>
                             </label>
@@ -354,7 +346,7 @@ export default function DocumentQCMPage() {
                 ))}
 
                 <div className="flex justify-end mt-6 gap-4">
-                  <Button onClick={handleSubmit}>
+                  <Button onClick={handleSubmit} className="w-full sm:w-auto py-2 text-base">
                     Soumettre les réponses
                   </Button>
                 </div>
@@ -362,20 +354,20 @@ export default function DocumentQCMPage() {
             )}
 
             {showResults && existingScore === null && (
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle>Résultats du QCM</CardTitle>
+              <Card className="mt-6 dark:bg-gray-900 dark:border-gray-700">
+                <CardHeader className="dark:bg-gray-900">
+                  <CardTitle className="dark:text-blue-200">Résultats du QCM</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="dark:bg-gray-900">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-lg font-medium">Score:</span>
-                      <span className="text-lg font-bold">{score.correct}/{score.total} ({score.percentage.toFixed(2)}%)</span>
+                      <span className="text-lg font-medium dark:text-gray-100">Score:</span>
+                      <span className="text-lg font-bold dark:text-gray-100">{score.correct}/{score.total} ({score.percentage.toFixed(2)}%)</span>
                     </div>
                     
-                    <div className="w-full bg-gray-200 rounded-full h-4">
+                    <div className="w-full bg-gray-200 rounded-full h-5">
                       <div 
-                        className={`h-4 rounded-full ${
+                        className={`h-5 rounded-full ${
                           score.percentage >= 80 ? 'bg-green-500' : 
                           score.percentage >= 50 ? 'bg-yellow-500' : 
                           'bg-red-500'
@@ -401,7 +393,7 @@ export default function DocumentQCMPage() {
                 <CardFooter>
                   <Button 
                     variant="outline" 
-                    className="w-full"
+                    className="w-full py-2 text-base"
                     onClick={() => router.push('/dashboard')}
                   >
                     Retour à l'accueil

@@ -164,15 +164,15 @@ export default function DocumentResultsPage() {
         </Card>
       ) : (
         <>
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>{document.title}</CardTitle>
-              <CardDescription>
+          <Card className="mb-6 dark:bg-gray-900 dark:border-gray-700">
+            <CardHeader className="dark:bg-gray-900">
+              <CardTitle className="dark:text-gray-100">{document.title}</CardTitle>
+              <CardDescription className="dark:text-gray-300">
                 Créé le {format(new Date(document.created_at), "d MMMM yyyy", { locale: fr })}
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-500">
+            <CardContent className="dark:bg-gray-900">
+              <p className="text-sm text-gray-500 dark:text-gray-300">
                 {userResults.length === 0 
                   ? "Aucun utilisateur n'a accès à ce document." 
                   : `Ce document est partagé avec ${userResults.length} utilisateur${userResults.length > 1 ? 's' : ''}.`}
@@ -181,29 +181,29 @@ export default function DocumentResultsPage() {
           </Card>
 
           {userResults.length > 0 ? (
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white rounded-lg shadow overflow-hidden dark:bg-gray-900 dark:border dark:border-gray-700">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+                  <thead className="bg-gray-50 dark:bg-gray-900">
                     <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                         Utilisateur
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                         Statut
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                         Score
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
                     {userResults.map((result) => (
                       <tr key={result.user_id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <User className="h-5 w-5 text-gray-400 mr-3" />
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                               {result.email}
                             </div>
                           </div>
@@ -213,18 +213,18 @@ export default function DocumentResultsPage() {
                             {result.has_taken_test ? (
                               <>
                                 <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                                <span className="text-sm text-green-600">Test complété</span>
+                                <span className="text-sm text-green-600 dark:text-green-400">Test complété</span>
                               </>
                             ) : (
                               <>
                                 <XCircle className="h-5 w-5 text-gray-400 mr-2" />
-                                <span className="text-sm text-gray-500">En attente</span>
+                                <span className="text-sm text-gray-500 dark:text-gray-400">En attente</span>
                               </>
                             )}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={`text-sm font-medium ${getScoreColor(result.score)}`}>
+                          <div className={`text-sm font-medium ${getScoreColor(result.score)} dark:text-gray-100`}>
                             {result.has_taken_test 
                               ? `${result.score}%` 
                               : "Non disponible"}
@@ -237,11 +237,11 @@ export default function DocumentResultsPage() {
               </div>
             </div>
           ) : (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-8">
+            <Card className="dark:bg-gray-900 dark:border-gray-700">
+              <CardContent className="flex flex-col items-center justify-center py-8 dark:bg-gray-900">
                 <User className="h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-lg font-medium text-gray-900">Aucun utilisateur</p>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-lg font-medium text-gray-900 dark:text-gray-100">Aucun utilisateur</p>
+                <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
                   Ce document n'est partagé avec aucun utilisateur
                 </p>
                 <Button
