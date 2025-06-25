@@ -69,63 +69,70 @@ export default function DocumentsPage() {
   }, [supabase, router]);
 
   return (
-    <div className="container mx-auto px-2 sm:px-6 py-6 max-w-2xl lg:max-w-6xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Documents partagés</h1>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <div className="container mx-auto px-4 sm:px-6 py-6 max-w-7xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Documents partagés
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">
+            Consultez et gérez tous vos documents partagés
+          </p>
+        </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="flex flex-col items-center gap-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <p className="text-muted-foreground">Chargement des documents...</p>
+        {isLoading ? (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex flex-col items-center gap-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="text-muted-foreground">Chargement des documents...</p>
+            </div>
           </div>
-        </div>
-      ) : documents.length === 0 ? (
-        <Card className="max-w-md mx-auto">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <FileText className="h-16 w-16 text-muted-foreground mb-6" />
-            <h2 className="text-xl font-semibold text-center mb-2">Aucun document partagé</h2>
-            <p className="text-muted-foreground text-center mb-6">
-              Commencez par créer un nouveau document pour générer des QCM.
-            </p>
-            <Button
-              onClick={() => router.push('/dashboard')}
-              className="w-full py-2 text-base"
-            >
-              Créer un document
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-          {documents.map((doc) => (
-            <Card key={doc.id} className="group hover:shadow-lg transition-all duration-200 flex flex-col rounded-xl border border-gray-200 bg-white/90 dark:bg-gray-900 dark:border-gray-700">
-              <CardHeader className="space-y-1 p-4 pb-2 dark:bg-gray-900">
-                <CardTitle className="line-clamp-2 text-base sm:text-lg font-semibold group-hover:text-primary transition-colors dark:text-gray-100">
-                  {doc.title}
-                </CardTitle>
-                <CardDescription className="flex items-center gap-2 text-xs sm:text-sm dark:text-gray-300">
-                  <Calendar className="h-4 w-4" />
-                  {format(new Date(doc.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex-1 flex flex-col p-4 pt-2 dark:bg-gray-900">
-                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-3 mb-4 dark:text-gray-300">
-                  {doc.summary || "Aucun résumé disponible"}
-                </p>
-                <Button 
-                  variant="outline"
-                  className="w-full py-2 text-base mt-auto group-hover:border-primary group-hover:text-primary transition-colors"
-                  onClick={() => router.push(`/documents/qcm/${doc.id}`)}
-                >
-                  Consulter le document
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+        ) : documents.length === 0 ? (
+          <Card className="max-w-md mx-auto rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <FileText className="h-16 w-16 text-muted-foreground mb-6" />
+              <h2 className="text-xl font-semibold text-center mb-2 text-gray-900 dark:text-gray-100">Aucun document partagé</h2>
+              <p className="text-muted-foreground text-center mb-6">
+                Commencez par créer un nouveau document pour générer des QCM.
+              </p>
+              <Button
+                onClick={() => router.push('/dashboard')}
+                className="w-full py-3 text-base font-medium bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+              >
+                Créer un document
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {documents.map((doc) => (
+              <Card key={doc.id} className="group hover:shadow-xl transition-all duration-300 flex flex-col rounded-2xl border border-gray-200 bg-white/90 dark:bg-gray-900/90 dark:border-gray-700 overflow-hidden">
+                <CardHeader className="space-y-2 p-6 pb-4">
+                  <CardTitle className="line-clamp-2 text-lg font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors dark:text-gray-100">
+                    {doc.title}
+                  </CardTitle>
+                  <CardDescription className="flex items-center gap-2 text-sm dark:text-gray-300">
+                    <Calendar className="h-4 w-4" />
+                    {format(new Date(doc.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col p-6 pt-2">
+                  <p className="text-sm text-muted-foreground line-clamp-3 mb-6 dark:text-gray-300">
+                    {doc.summary || "Aucun résumé disponible"}
+                  </p>
+                  <Button 
+                    variant="outline"
+                    className="w-full py-3 text-base font-medium mt-auto group-hover:border-blue-600 group-hover:text-blue-600 dark:group-hover:border-blue-400 dark:group-hover:text-blue-400 transition-colors"
+                    onClick={() => router.push(`/documents/qcm/${doc.id}`)}
+                  >
+                    Consulter le document
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 } 

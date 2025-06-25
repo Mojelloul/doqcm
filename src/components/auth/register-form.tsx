@@ -21,6 +21,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { useSupabaseContext } from "@/lib/context/SupabaseProvider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2, User, Mail, Lock, Shield } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -143,125 +144,141 @@ export function RegisterForm() {
 
   if (isSubmitted) {
     return (
-      <Card>
-        <CardHeader>
-          <h3 className="text-2xl font-semibold">Vérifiez vos e-mails</h3>
-        </CardHeader>
-        <CardContent>
-          <p>Inscription réussie !</p>
-          <p>
-            Nous vous avons envoyé un lien de confirmation à votre adresse e-mail.
+      <div className="text-center space-y-4">
+        <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+          <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Vérifiez vos e-mails</h3>
+          <p className="text-gray-600 dark:text-gray-300">
+            Inscription réussie ! Nous vous avons envoyé un lien de confirmation à votre adresse e-mail.
             Veuillez cliquer sur ce lien pour activer votre compte.
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nom complet</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="John Doe"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="exemple@email.com"
-                      type="email"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mot de passe</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="••••••••"
-                      type="password"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="privacyConsent"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>
-                      J'accepte la <a href="/privacy" className="underline" target="_blank">politique de confidentialité</a>
-                    </FormLabel>
-                    <FormDescription>
-                      En cochant cette case, vous acceptez que vos données soient traitées conformément à notre politique de confidentialité.
-                    </FormDescription>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Inscription en cours..." : "S'inscrire"}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-      <CardFooter className="flex flex-col space-y-2">
-        <div className="text-sm text-muted-foreground text-center">
-          Déjà un compte ?{" "}
-          <Button
-            variant="link"
-            className="p-0"
-            onClick={() => router.push("/login")}
-          >
-            Se connecter
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        {error && (
+          <Alert variant="destructive" className="border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800">
+            <AlertDescription className="text-red-800 dark:text-red-200">{error}</AlertDescription>
+          </Alert>
+        )}
+        
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Nom complet
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Entrez votre nom complet"
+                  disabled={isLoading}
+                  className="h-11 text-base"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Adresse email
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="exemple@email.com"
+                  type="email"
+                  disabled={isLoading}
+                  className="h-11 text-base"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <Lock className="w-4 h-4" />
+                Mot de passe
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Créez un mot de passe sécurisé"
+                  type="password"
+                  disabled={isLoading}
+                  className="h-11 text-base"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="privacyConsent"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800/50">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  className="mt-1"
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <Shield className="w-4 h-4" />
+                  J'accepte la <a href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline" target="_blank">politique de confidentialité</a>
+                </FormLabel>
+                <FormDescription className="text-xs text-gray-600 dark:text-gray-400">
+                  En cochant cette case, vous acceptez que vos données soient traitées conformément à notre politique de confidentialité.
+                </FormDescription>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <Button 
+          type="submit" 
+          className="w-full h-11 text-base font-medium bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600" 
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Inscription en cours...
+            </>
+          ) : (
+            "Créer mon compte"
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 } 

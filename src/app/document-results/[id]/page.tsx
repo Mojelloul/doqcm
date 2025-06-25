@@ -124,137 +124,149 @@ export default function DocumentResultsPage() {
   }, [supabase, router, documentId]);
 
   const getScoreColor = (score: number | null) => {
-    if (score === null) return "text-gray-500";
-    if (score >= 80) return "text-green-600";
-    if (score >= 50) return "text-yellow-600";
-    return "text-red-600";
+    if (score === null) return "text-gray-500 dark:text-gray-400";
+    if (score >= 80) return "text-green-600 dark:text-green-400";
+    if (score >= 50) return "text-yellow-600 dark:text-yellow-400";
+    return "text-red-600 dark:text-red-400";
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Résultats du QCM</h1>
-        <Button
-          variant="outline"
-          onClick={() => router.push('/my-documents')}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Retour
-        </Button>
-      </div>
-
-      {isLoading ? (
-        <div className="text-center">Chargement des résultats...</div>
-      ) : !document ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-8">
-            <FileText className="h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-lg font-medium text-gray-900">Document non trouvé</p>
-            <p className="text-sm text-gray-500 mt-1">
-              Le document demandé n'existe pas ou vous n'êtes pas autorisé à y accéder
-            </p>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <div className="container mx-auto px-4 sm:px-6 py-6 max-w-6xl">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Résultats du QCM</h1>
             <Button
+              variant="outline"
               onClick={() => router.push('/my-documents')}
-              className="mt-4"
+              className="flex items-center gap-2"
             >
-              Retour à mes documents
+              <ArrowLeft className="h-4 w-4" />
+              Retour
             </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          <Card className="mb-6 dark:bg-gray-900 dark:border-gray-700">
-            <CardHeader className="dark:bg-gray-900">
-              <CardTitle className="dark:text-gray-100">{document.title}</CardTitle>
-              <CardDescription className="dark:text-gray-300">
-                Créé le {format(new Date(document.created_at), "d MMMM yyyy", { locale: fr })}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="dark:bg-gray-900">
-              <p className="text-sm text-gray-500 dark:text-gray-300">
-                {userResults.length === 0 
-                  ? "Aucun utilisateur n'a accès à ce document." 
-                  : `Ce document est partagé avec ${userResults.length} utilisateur${userResults.length > 1 ? 's' : ''}.`}
+          </div>
+          <p className="text-gray-600 dark:text-gray-300">
+            Suivez les performances de vos utilisateurs sur ce document
+          </p>
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex flex-col items-center gap-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="text-muted-foreground">Chargement des résultats...</p>
+            </div>
+          </div>
+        ) : !document ? (
+          <Card className="rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <FileText className="h-16 w-16 text-gray-400 mb-4" />
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Document non trouvé</h2>
+              <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
+                Le document demandé n'existe pas ou vous n'êtes pas autorisé à y accéder
               </p>
+              <Button
+                onClick={() => router.push('/my-documents')}
+                className="py-3 text-base font-medium bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+              >
+                Retour à mes documents
+              </Button>
             </CardContent>
           </Card>
-
-          {userResults.length > 0 ? (
-            <div className="bg-white rounded-lg shadow overflow-hidden dark:bg-gray-900 dark:border dark:border-gray-700">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
-                  <thead className="bg-gray-50 dark:bg-gray-900">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
-                        Utilisateur
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
-                        Statut
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
-                        Score
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-                    {userResults.map((result) => (
-                      <tr key={result.user_id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <User className="h-5 w-5 text-gray-400 mr-3" />
-                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                              {result.email}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            {result.has_taken_test ? (
-                              <>
-                                <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                                <span className="text-sm text-green-600 dark:text-green-400">Test complété</span>
-                              </>
-                            ) : (
-                              <>
-                                <XCircle className="h-5 w-5 text-gray-400 mr-2" />
-                                <span className="text-sm text-gray-500 dark:text-gray-400">En attente</span>
-                              </>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={`text-sm font-medium ${getScoreColor(result.score)} dark:text-gray-100`}>
-                            {result.has_taken_test 
-                              ? `${result.score}%` 
-                              : "Non disponible"}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ) : (
-            <Card className="dark:bg-gray-900 dark:border-gray-700">
-              <CardContent className="flex flex-col items-center justify-center py-8 dark:bg-gray-900">
-                <User className="h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-lg font-medium text-gray-900 dark:text-gray-100">Aucun utilisateur</p>
-                <p className="text-sm text-gray-500 mt-1 dark:text-gray-400">
-                  Ce document n'est partagé avec aucun utilisateur
+        ) : (
+          <>
+            <Card className="mb-8 rounded-2xl shadow-lg border border-gray-200 bg-white/90 dark:bg-gray-900/90 dark:border-gray-700 overflow-hidden">
+              <CardHeader className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-6">
+                <CardTitle className="text-xl sm:text-2xl text-blue-700 dark:text-blue-400">{document.title}</CardTitle>
+                <CardDescription className="text-gray-600 dark:text-gray-300">
+                  Créé le {format(new Date(document.created_at), "d MMMM yyyy", { locale: fr })}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  {userResults.length === 0 
+                    ? "Aucun utilisateur n'a accès à ce document." 
+                    : `Ce document est partagé avec ${userResults.length} utilisateur${userResults.length > 1 ? 's' : ''}.`}
                 </p>
-                <Button
-                  onClick={() => router.push('/dashboard')}
-                  className="mt-4"
-                >
-                  Créer un nouveau document
-                </Button>
               </CardContent>
             </Card>
-          )}
-        </>
-      )}
+
+            {userResults.length > 0 ? (
+              <Card className="rounded-2xl shadow-lg border border-gray-200 bg-white/90 dark:bg-gray-900/90 dark:border-gray-700 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead className="bg-gray-50 dark:bg-gray-800/50">
+                      <tr>
+                        <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider dark:text-gray-300">
+                          Utilisateur
+                        </th>
+                        <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider dark:text-gray-300">
+                          Statut
+                        </th>
+                        <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider dark:text-gray-300">
+                          Score
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                      {userResults.map((result) => (
+                        <tr key={result.user_id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <User className="h-5 w-5 text-gray-400 mr-3" />
+                              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                {result.email}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              {result.has_taken_test ? (
+                                <>
+                                  <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                                  <span className="text-sm text-green-600 dark:text-green-400 font-medium">Test complété</span>
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="h-5 w-5 text-gray-400 mr-2" />
+                                  <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">En attente</span>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className={`text-sm font-semibold ${getScoreColor(result.score)}`}>
+                              {result.has_taken_test 
+                                ? `${result.score}%` 
+                                : "Non disponible"}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            ) : (
+              <Card className="rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <User className="h-16 w-16 text-gray-400 mb-4" />
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Aucun utilisateur</h2>
+                  <p className="text-gray-600 dark:text-gray-300 text-center mb-6">
+                    Ce document n'est partagé avec aucun utilisateur
+                  </p>
+                  <Button
+                    onClick={() => router.push('/dashboard')}
+                    className="py-3 text-base font-medium bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                  >
+                    Créer un nouveau document
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 } 

@@ -158,252 +158,265 @@ export default function DocumentQCMPage() {
   const getChoiceClassName = (questionId: string, choiceId: string) => {
     const isSelected = selectedAnswers[questionId] === choiceId;
     if (!showResults) {
-      return `flex items-center gap-3 p-4 border rounded-md transition-colors ${
-        isSelected ? 'bg-blue-50 border-blue-300 shadow-sm dark:bg-blue-900' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+      return `flex items-center gap-3 p-4 border rounded-lg transition-colors cursor-pointer ${
+        isSelected ? 'bg-blue-50 border-blue-300 shadow-sm dark:bg-blue-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
       }`;
     }
     const choice = questionChoices[questionId]?.find(c => c.id === choiceId);
     const isCorrect = choice?.is_correct;
     if (isSelected && isCorrect) {
-      return 'flex items-center gap-3 p-4 border rounded-md bg-green-50 border-green-500 shadow-sm dark:bg-green-900';
+      return 'flex items-center gap-3 p-4 border rounded-lg bg-green-50 border-green-500 shadow-sm dark:bg-green-900/50';
     } else if (isSelected && !isCorrect) {
-      return 'flex items-center gap-3 p-4 border rounded-md bg-red-50 border-red-500 shadow-sm dark:bg-red-900';
+      return 'flex items-center gap-3 p-4 border rounded-lg bg-red-50 border-red-500 shadow-sm dark:bg-red-900/50';
     } else if (!isSelected && isCorrect) {
-      return 'flex items-center gap-3 p-4 border rounded-md bg-green-50 border-green-500 opacity-70 dark:bg-green-900';
+      return 'flex items-center gap-3 p-4 border rounded-lg bg-green-50 border-green-500 opacity-70 dark:bg-green-900/50';
     } else {
-      return 'flex items-center gap-3 p-4 border rounded-md hover:bg-gray-50 dark:hover:bg-gray-800';
+      return 'flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50';
     }
   };
 
   return (
-    <div className="container mx-auto px-2 sm:px-6 py-6 max-w-2xl lg:max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg sm:text-2xl font-bold">Test QCM du Document</h1>
-        <div className="flex gap-4">
-          <Button
-            variant="outline"
-            onClick={() => router.back()}
-            className="flex items-center gap-2 w-full sm:w-auto"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Retour
-          </Button>
-        </div>
-      </div>
-
-      {isLoading ? (
-        <div className="text-center">Chargement du test QCM...</div>
-      ) : error ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-8">
-            <FileText className="h-12 w-12 text-red-400 mb-4" />
-            <p className="text-lg font-medium text-gray-900 mb-2">Erreur</p>
-            <p className="text-sm text-gray-600 mb-4 text-center">{error}</p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => router.push('/documents')}
-                className="w-full sm:w-auto py-2 text-base"
-              >
-                Retour aux documents
-              </Button>
-              <Button
-                onClick={() => window.location.reload()}
-                className="w-full sm:w-auto py-2 text-base"
-              >
-                Réessayer
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : !document ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-8">
-            <FileText className="h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-lg font-medium text-gray-900">Document non trouvé</p>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <div className="container mx-auto px-4 sm:px-6 py-6 max-w-4xl">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Test QCM du Document</h1>
             <Button
-              onClick={() => router.push('/documents')}
-              className="mt-4 w-full sm:w-auto py-2 text-base"
+              variant="outline"
+              onClick={() => router.back()}
+              className="flex items-center gap-2"
             >
-              Retour aux documents
+              <ArrowLeft className="h-4 w-4" />
+              Retour
             </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          <Card className="mb-8 shadow-md rounded-xl border border-gray-200 bg-white/90 dark:bg-gray-900 dark:border-gray-700">
-            <CardHeader className="border-b bg-gray-50 rounded-t-xl p-4 pb-2 dark:bg-gray-900">
-              <CardTitle className="text-base sm:text-xl text-blue-800 dark:text-blue-200">{document.title}</CardTitle>
-              <CardDescription className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                Créé le {format(new Date(document.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-4 p-4 dark:bg-gray-900">
-              {document.summary && (
-                <div className="mb-6 bg-blue-50 p-4 rounded-md border border-blue-100 dark:bg-blue-950 dark:border-blue-900">
-                  <h3 className="text-sm sm:text-md font-semibold text-blue-800 dark:text-blue-200 mb-2">Points importants</h3>
-                  <p className="text-gray-700 italic text-sm sm:text-base dark:text-gray-200">{document.summary}</p>
-                </div>
-              )}
-              <div className="mt-4">
-                <h3 className="text-sm sm:text-md font-semibold text-gray-800 dark:text-gray-100 mb-2">Contenu du document</h3>
-                <div className="prose max-w-none dark:text-gray-200">
-                  {document.content.split('\n').map((paragraph, index) => (
-                    paragraph.trim() ? (
-                      <p key={index} className="mb-4 text-gray-700 leading-relaxed text-sm sm:text-base dark:text-gray-200">
-                        {paragraph}
-                      </p>
-                    ) : null
-                  ))}
-                </div>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300">
+            Répondez aux questions pour tester votre compréhension du document
+          </p>
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex flex-col items-center gap-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="text-muted-foreground">Chargement du test QCM...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <Card className="rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <FileText className="h-16 w-16 text-red-400 mb-4" />
+              <p className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Erreur</p>
+              <p className="text-gray-600 dark:text-gray-300 mb-6 text-center">{error}</p>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => router.push('/documents')}
+                  className="py-3 text-base"
+                >
+                  Retour aux documents
+                </Button>
+                <Button
+                  onClick={() => window.location.reload()}
+                  className="py-3 text-base bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                >
+                  Réessayer
+                </Button>
               </div>
             </CardContent>
           </Card>
+        ) : !document ? (
+          <Card className="rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <FileText className="h-16 w-16 text-gray-400 mb-4" />
+              <p className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Document non trouvé</p>
+              <Button
+                onClick={() => router.push('/documents')}
+                className="mt-4 py-3 text-base bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+              >
+                Retour aux documents
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <Card className="mb-8 rounded-2xl shadow-lg border border-gray-200 bg-white/90 dark:bg-gray-900/90 dark:border-gray-700 overflow-hidden">
+              <CardHeader className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-6">
+                <CardTitle className="text-xl sm:text-2xl text-blue-700 dark:text-blue-400">{document.title}</CardTitle>
+                <CardDescription className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  Créé le {format(new Date(document.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                {document.summary && (
+                  <div className="mb-6 bg-blue-50 dark:bg-blue-950 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">Points importants</h3>
+                    <p className="text-gray-700 dark:text-gray-200 italic">{document.summary}</p>
+                  </div>
+                )}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">Contenu du document</h3>
+                  <div className="prose max-w-none">
+                    {document.content.split('\n').map((paragraph, index) => (
+                      paragraph.trim() ? (
+                        <p key={index} className="mb-4 text-gray-700 dark:text-gray-200 leading-relaxed">
+                          {paragraph}
+                        </p>
+                      ) : null
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-          <div className="border-t border-gray-200 my-8 pt-8">
-            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-blue-800">Questions du QCM</h2>
+            <div className="border-t border-gray-200 dark:border-gray-700 my-8 pt-8">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-6 text-blue-700 dark:text-blue-400">Questions du QCM</h2>
 
-            {questions.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-8">
-                  <HelpCircle className="h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-lg font-medium text-gray-900">Aucune question trouvée</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Ce document n'a pas encore de questions QCM associées
-                  </p>
-                </CardContent>
-              </Card>
-            ) : existingScore !== null || showResults ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-8">
-                  <div className="text-center">
-                    <p className="text-lg font-medium text-gray-900 mb-4">Vous avez déjà complété ce QCM</p>
-                    <p className="text-sm text-gray-500 mb-6">
-                      Votre score: {score.percentage.toFixed(2)}%
+              {questions.length === 0 ? (
+                <Card className="rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <HelpCircle className="h-16 w-16 text-gray-400 mb-4" />
+                    <p className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Aucune question trouvée</p>
+                    <p className="text-gray-600 dark:text-gray-300 text-center">
+                      Ce document n'a pas encore de questions QCM associées
                     </p>
-                    <div className="w-full max-w-xs sm:max-w-md mx-auto bg-gray-200 rounded-full h-5 mb-6">
-                      <div 
-                        className={`h-5 rounded-full ${
-                          score.percentage >= 80 ? 'bg-green-500' : 
-                          score.percentage >= 50 ? 'bg-yellow-500' : 
-                          'bg-red-500'
-                        }`} 
-                        style={{ width: `${score.percentage}%` }}
-                      ></div>
+                  </CardContent>
+                </Card>
+              ) : existingScore !== null || showResults ? (
+                <Card className="rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <div className="text-center">
+                      <p className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Vous avez déjà complété ce QCM</p>
+                      <p className="text-gray-600 dark:text-gray-300 mb-6">
+                        Votre score: {score.percentage.toFixed(2)}%
+                      </p>
+                      <div className="w-full max-w-md mx-auto bg-gray-200 dark:bg-gray-700 rounded-full h-6 mb-6">
+                        <div 
+                          className={`h-6 rounded-full transition-all duration-500 ${
+                            score.percentage >= 80 ? 'bg-green-500' : 
+                            score.percentage >= 50 ? 'bg-yellow-500' : 
+                            'bg-red-500'
+                          }`} 
+                          style={{ width: `${score.percentage}%` }}
+                        ></div>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        className="py-3 text-base"
+                        onClick={() => router.push('/dashboard')}
+                      >
+                        Retour à l'accueil
+                      </Button>
                     </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-6">
+                  {questions.map((question, index) => (
+                    <Card key={question.id} className="rounded-2xl border border-gray-200 bg-white/90 dark:bg-gray-900/90 dark:border-gray-700 overflow-hidden">
+                      <CardHeader className="p-6 pb-4">
+                        <CardTitle className="text-lg sm:text-xl text-blue-700 dark:text-blue-400">Question {index + 1}</CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-6 pt-2">
+                        <p className="font-medium mb-6 text-gray-800 dark:text-gray-100">{question.question}</p>
+                        <div className="space-y-3">
+                          {questionChoices[question.id] && questionChoices[question.id].map((choice, choiceIndex) => (
+                            <div 
+                              key={choice.id} 
+                              className={getChoiceClassName(question.id, choice.id)}
+                              onClick={() => handleAnswerSelect(question.id, choice.id)}
+                            >
+                              <input 
+                                type="radio" 
+                                name={`question-${question.id}`} 
+                                id={`choice-${choice.id}`} 
+                                className="h-5 w-5 text-blue-600"
+                                checked={selectedAnswers[question.id] === choice.id}
+                                onChange={() => {}}
+                              />
+                              <label 
+                                htmlFor={`choice-${choice.id}`} 
+                                className="flex-grow cursor-pointer"
+                              >
+                                <span className="block font-medium text-gray-800 dark:text-gray-100">
+                                  <span className="inline-block w-6 text-center mr-3 text-gray-500 dark:text-gray-400">{choiceIndex + 1}.</span>
+                                  {choice.choice}
+                                </span>
+                              </label>
+                            </div>
+                          ))}
+                          
+                          {(!questionChoices[question.id] || questionChoices[question.id].length === 0) && (
+                            <p className="text-gray-500 dark:text-gray-400 italic">Aucun choix disponible pour cette question</p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+
+                  <div className="flex justify-end mt-8">
+                    <Button 
+                      onClick={handleSubmit} 
+                      className="py-3 px-8 text-base font-medium bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                    >
+                      Soumettre les réponses
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {showResults && existingScore === null && (
+                <Card className="mt-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90">
+                  <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+                    <CardTitle className="text-xl text-blue-700 dark:text-blue-400">Résultats du QCM</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-medium text-gray-800 dark:text-gray-100">Score:</span>
+                        <span className="text-xl font-bold text-blue-700 dark:text-blue-400">{score.correct}/{score.total} ({score.percentage.toFixed(2)}%)</span>
+                      </div>
+                      
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-6">
+                        <div 
+                          className={`h-6 rounded-full transition-all duration-500 ${
+                            score.percentage >= 80 ? 'bg-green-500' : 
+                            score.percentage >= 50 ? 'bg-yellow-500' : 
+                            'bg-red-500'
+                          }`} 
+                          style={{ width: `${score.percentage}%` }}
+                        ></div>
+                      </div>
+                      
+                      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <p className="text-gray-600 dark:text-gray-300 mb-3">
+                          {score.percentage >= 80 
+                            ? "Excellent travail ! Vous avez une très bonne compréhension du sujet." 
+                            : score.percentage >= 50 
+                            ? "Bon travail ! Vous avez une compréhension correcte du sujet, mais il y a encore place à l'amélioration." 
+                            : "Vous pourriez bénéficier d'une révision supplémentaire du sujet."}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Votre score a été enregistré et est visible par le créateur du document.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="border-t border-gray-200 dark:border-gray-700">
                     <Button 
                       variant="outline" 
-                      className="mx-auto w-full sm:w-auto py-2 text-base"
+                      className="w-full py-3 text-base"
                       onClick={() => router.push('/dashboard')}
                     >
                       Retour à l'accueil
                     </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4 sm:space-y-6">
-                {questions.map((question, index) => (
-                  <Card key={question.id} className="rounded-xl border border-gray-200 bg-white/90 dark:bg-gray-900 dark:border-gray-700">
-                    <CardHeader className="p-4 pb-2 dark:bg-gray-900">
-                      <CardTitle className="text-base sm:text-lg dark:text-blue-200">Question {index + 1}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-2 dark:bg-gray-900">
-                      <p className="font-medium mb-4 text-sm sm:text-base dark:text-gray-100">{question.question}</p>
-                      <div className="space-y-2">
-                        {questionChoices[question.id] && questionChoices[question.id].map((choice, choiceIndex) => (
-                          <div 
-                            key={choice.id} 
-                            className={getChoiceClassName(question.id, choice.id)}
-                            onClick={() => handleAnswerSelect(question.id, choice.id)}
-                          >
-                            <input 
-                              type="radio" 
-                              name={`question-${question.id}`} 
-                              id={`choice-${choice.id}`} 
-                              className="h-5 w-5 text-blue-600"
-                              checked={selectedAnswers[question.id] === choice.id}
-                              onChange={() => {}}
-                            />
-                            <label 
-                              htmlFor={`choice-${choice.id}`} 
-                              className="flex-grow cursor-pointer"
-                            >
-                              <span className="block text-sm sm:text-base font-medium text-gray-800 dark:text-gray-100">
-                                <span className="inline-block w-6 text-center mr-2 text-gray-500 dark:text-gray-400">{choiceIndex + 1}.</span>
-                                {choice.choice}
-                              </span>
-                            </label>
-                          </div>
-                        ))}
-                        
-                        {(!questionChoices[question.id] || questionChoices[question.id].length === 0) && (
-                          <p className="text-sm text-gray-500 italic">Aucun choix disponible pour cette question</p>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-
-                <div className="flex justify-end mt-6 gap-4">
-                  <Button onClick={handleSubmit} className="w-full sm:w-auto py-2 text-base">
-                    Soumettre les réponses
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {showResults && existingScore === null && (
-              <Card className="mt-6 dark:bg-gray-900 dark:border-gray-700">
-                <CardHeader className="dark:bg-gray-900">
-                  <CardTitle className="dark:text-blue-200">Résultats du QCM</CardTitle>
-                </CardHeader>
-                <CardContent className="dark:bg-gray-900">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-medium dark:text-gray-100">Score:</span>
-                      <span className="text-lg font-bold dark:text-gray-100">{score.correct}/{score.total} ({score.percentage.toFixed(2)}%)</span>
-                    </div>
-                    
-                    <div className="w-full bg-gray-200 rounded-full h-5">
-                      <div 
-                        className={`h-5 rounded-full ${
-                          score.percentage >= 80 ? 'bg-green-500' : 
-                          score.percentage >= 50 ? 'bg-yellow-500' : 
-                          'bg-red-500'
-                        }`} 
-                        style={{ width: `${score.percentage}%` }}
-                      ></div>
-                    </div>
-                    
-                    <div className="pt-4 border-t">
-                      <p className="text-sm text-gray-600 mb-2">
-                        {score.percentage >= 80 
-                          ? "Excellent travail ! Vous avez une très bonne compréhension du sujet." 
-                          : score.percentage >= 50 
-                          ? "Bon travail ! Vous avez une compréhension correcte du sujet, mais il y a encore place à l'amélioration." 
-                          : "Vous pourriez bénéficier d'une révision supplémentaire du sujet."}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Votre score a été enregistré et est visible par le créateur du document.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button 
-                    variant="outline" 
-                    className="w-full py-2 text-base"
-                    onClick={() => router.push('/dashboard')}
-                  >
-                    Retour à l'accueil
-                  </Button>
-                </CardFooter>
-              </Card>
-            )}
-          </div>
-        </>
-      )}
+                  </CardFooter>
+                </Card>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 } 
