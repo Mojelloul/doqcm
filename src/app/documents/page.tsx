@@ -69,9 +69,9 @@ export default function DocumentsPage() {
   }, [supabase, router]);
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Documents partagés</h1>
+    <div className="container mx-auto px-2 sm:px-6 py-6 max-w-2xl lg:max-w-6xl">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Documents partagés</h1>
       </div>
 
       {isLoading ? (
@@ -91,32 +91,32 @@ export default function DocumentsPage() {
             </p>
             <Button
               onClick={() => router.push('/dashboard')}
-              className="w-full sm:w-auto"
+              className="w-full py-2 text-base"
             >
               Créer un document
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           {documents.map((doc) => (
-            <Card key={doc.id} className="group hover:shadow-lg transition-all duration-200 flex flex-col">
-              <CardHeader className="space-y-1">
-                <CardTitle className="line-clamp-2 text-lg font-semibold group-hover:text-primary transition-colors">
+            <Card key={doc.id} className="group hover:shadow-lg transition-all duration-200 flex flex-col rounded-xl border border-gray-200 bg-white/90">
+              <CardHeader className="space-y-1 p-4 pb-2">
+                <CardTitle className="line-clamp-2 text-base sm:text-lg font-semibold group-hover:text-primary transition-colors">
                   {doc.title}
                 </CardTitle>
-                <CardDescription className="flex items-center gap-2 text-sm">
+                <CardDescription className="flex items-center gap-2 text-xs sm:text-sm">
                   <Calendar className="h-4 w-4" />
                   {format(new Date(doc.created_at), "d MMMM yyyy 'à' HH:mm", { locale: fr })}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col">
-                <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+              <CardContent className="flex-1 flex flex-col p-4 pt-2">
+                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-3 mb-4">
                   {doc.summary || "Aucun résumé disponible"}
                 </p>
                 <Button 
                   variant="outline"
-                  className="w-full mt-auto group-hover:border-primary group-hover:text-primary transition-colors"
+                  className="w-full py-2 text-base mt-auto group-hover:border-primary group-hover:text-primary transition-colors"
                   onClick={() => router.push(`/documents/qcm/${doc.id}`)}
                 >
                   Consulter le document
