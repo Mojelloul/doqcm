@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { FileText, ArrowLeft, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import Script from "next/script";
 
 interface Document {
   id: string;
@@ -80,7 +79,7 @@ export default function DocumentsPage() {
             Consultez et gérez tous vos documents partagés
           </p>
           {/* Encadré pub Vignette Banner */}
-          <div className="my-8 flex justify-center">
+          {/* <div className="my-8 flex justify-center">
             <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white dark:bg-gray-900 shadow p-0 overflow-hidden">
               <div className="w-full h-32 flex items-center justify-center bg-gray-50 dark:bg-gray-800">
                 <div id="monetag-documents-banner" />
@@ -92,7 +91,7 @@ export default function DocumentsPage() {
             <Script id="monetag-documents-banner-script" strategy="afterInteractive">
               {`(function(d,z,s){s.src='//stoampaliy.net/400/9494559';try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('stoampaliy.net',9494559,document.createElement('script'))`}
             </Script>
-          </div>
+          </div> */}
         </div>
 
         {isLoading ? (
@@ -149,7 +148,7 @@ export default function DocumentsPage() {
         )}
 
         {/* Carte Direct Link en bas de page */}
-        <div className="mt-12 flex justify-center">
+        {/* <div className="mt-12 flex justify-center">
           <a
             href="https://otieu.com/4/9494564"
             target="_blank"
@@ -167,7 +166,7 @@ export default function DocumentsPage() {
               <span className="text-gray-700 dark:text-gray-300 text-xs">Découvrez nos solutions sponsorisées</span>
             </div>
           </a>
-        </div>
+        </div> */}
       </div>
     </div>
   );
