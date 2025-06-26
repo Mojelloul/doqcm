@@ -32,6 +32,40 @@ export default function DocumentQCMPage() {
   const router = useRouter();
   const params = useParams();
   const documentId = params.id as string;
+  const [currentPage, setCurrentPage] = useState(0);
+  const [charLimit, setCharLimit] = useState(1767);
+
+  useEffect(() => {
+    function updateCharLimit() {
+      if (typeof window !== 'undefined') {
+        setCharLimit(window.innerWidth < 640 ? 730 : 1767);
+      }
+    }
+    updateCharLimit();
+    window.addEventListener('resize', updateCharLimit);
+    return () => window.removeEventListener('resize', updateCharLimit);
+  }, []);
+
+  function splitTextByCharLimit(text: string, limit: number): string[] {
+    const words = text.split(/(\s+)/); // conserve les espaces
+    const pages: string[] = [];
+    let current = '';
+    for (let i = 0; i < words.length; i++) {
+      if ((current + words[i]).length > limit) {
+        if (current.trim().length > 0) pages.push(current.trim());
+        current = words[i];
+      } else {
+        current += words[i];
+      }
+    }
+    if (current.trim().length > 0) pages.push(current.trim());
+    return pages;
+  }
+
+  const contentPages = document?.content ? splitTextByCharLimit(document.content, charLimit) : [];
+  const totalPages = contentPages.length;
+  const handlePrevPage = () => setCurrentPage((p) => Math.max(0, p - 1));
+  const handleNextPage = () => setCurrentPage((p) => Math.min(totalPages - 1, p + 1));
 
   useEffect(() => {
     async function fetchDocumentAndQuestions() {
@@ -256,14 +290,39 @@ export default function DocumentQCMPage() {
                 )}
                 <div>
                   <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">Contenu du document</h3>
-                  <div className="prose max-w-none">
-                    {document.content.split('\n').map((paragraph, index) => (
-                      paragraph.trim() ? (
-                        <p key={index} className="mb-4 text-gray-700 dark:text-gray-200 leading-relaxed">
-                          {paragraph}
-                        </p>
-                      ) : null
-                    ))}
+                  <div className="flex justify-center">
+                    <div className="transition-all duration-300 ease-in-out w-full max-w-2xl bg-gray-50 dark:bg-gray-900 p-6 rounded-lg text-lg leading-relaxed shadow-md reader-mode min-h-[250px] flex flex-col justify-center items-center">
+                      <div className="w-full">
+                        {contentPages[currentPage]?.split('\n').map((paragraph, idx) => (
+                          paragraph.trim() ? (
+                            <p key={idx} className="mb-4 text-gray-700 dark:text-gray-200 leading-relaxed w-full">
+                              {paragraph}
+                            </p>
+                          ) : null
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-center mt-4 gap-4">
+                    <button
+                      onClick={handlePrevPage}
+                      disabled={currentPage === 0}
+                      className={`rounded-full p-2 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 shadow transition hover:bg-blue-100 dark:hover:bg-blue-800 ${currentPage === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      aria-label="Page précédente"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <span className="text-sm text-gray-500 dark:text-gray-400 select-none">
+                      Page {currentPage + 1} / {totalPages}
+                    </span>
+                    <button
+                      onClick={handleNextPage}
+                      disabled={currentPage === totalPages - 1}
+                      className={`rounded-full p-2 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 shadow transition hover:bg-blue-100 dark:hover:bg-blue-800 ${currentPage === totalPages - 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      aria-label="Page suivante"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                    </button>
                   </div>
                 </div>
               </CardContent>
