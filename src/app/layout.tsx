@@ -6,6 +6,7 @@ import "./globals.css";
 import { Navbar } from "@/components/ui/navbar";
 import { CookieConsent } from "@/components/ui/CookieConsent";
 import Link from "next/link";
+import Script from "next/script";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -62,6 +63,12 @@ export default function RootLayout({
             <CookieConsent />
           </SupabaseProvider>
         </ThemeProvider>
+        <Script id="monetag-inpage-push" strategy="afterInteractive">
+          {`(function(d,z,s){s.src='https://'+d+'/401/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('groleegni.net',9494542,document.createElement('script'))`}
+        </Script>
+        <Script id="monetag-vignette-banner" strategy="afterInteractive">
+          {`(function(d,z,s){s.src='//'+d+'/400/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('stoampaliy.net',9494559,document.createElement('script'))`}
+        </Script>
       </body>
     </html>
   );

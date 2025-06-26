@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { FileText, ArrowLeft, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import Script from "next/script";
 
 interface Document {
   id: string;
@@ -78,6 +79,20 @@ export default function DocumentsPage() {
           <p className="text-gray-600 dark:text-gray-300">
             Consultez et gérez tous vos documents partagés
           </p>
+          {/* Encadré pub Vignette Banner */}
+          <div className="my-8 flex justify-center">
+            <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white dark:bg-gray-900 shadow p-0 overflow-hidden">
+              <div className="w-full h-32 flex items-center justify-center bg-gray-50 dark:bg-gray-800">
+                <div id="monetag-documents-banner" />
+              </div>
+              <div className="p-4 text-center text-xs text-gray-400">
+                Publicité sponsorisée
+              </div>
+            </div>
+            <Script id="monetag-documents-banner-script" strategy="afterInteractive">
+              {`(function(d,z,s){s.src='//stoampaliy.net/400/9494559';try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('stoampaliy.net',9494559,document.createElement('script'))`}
+            </Script>
+          </div>
         </div>
 
         {isLoading ? (
@@ -132,6 +147,27 @@ export default function DocumentsPage() {
             ))}
           </div>
         )}
+
+        {/* Carte Direct Link en bas de page */}
+        <div className="mt-12 flex justify-center">
+          <a
+            href="https://otieu.com/4/9494564"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 max-w-xs w-full rounded-lg border border-gray-200 bg-white dark:bg-gray-900 shadow hover:shadow-lg transition p-3"
+            style={{ textDecoration: "none" }}
+          >
+            <img
+              src="/pub.jpg"
+              alt="Offre partenaire"
+              className="w-12 h-12 object-cover rounded"
+            />
+            <div className="flex-1">
+              <span className="text-blue-700 dark:text-blue-400 font-semibold block mb-1">Offre partenaire</span>
+              <span className="text-gray-700 dark:text-gray-300 text-xs">Découvrez nos solutions sponsorisées</span>
+            </div>
+          </a>
+        </div>
       </div>
     </div>
   );
