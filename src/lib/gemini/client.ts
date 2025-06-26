@@ -65,7 +65,7 @@ export class GeminiClient {
   }
 
   // Méthode spécifique pour générer un QCM
-  async generateQCM(text: string, title: string, summary: string, numberOfQuestions: number = 3) {
+  async generateQCM(text: string, title: string, summary: string, numberOfQuestions: number = 10) {
     const prompt = `You are an advanced AI specialized in text analysis and quiz generation.
 
 ### Instructions:

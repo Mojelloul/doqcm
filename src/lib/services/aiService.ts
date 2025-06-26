@@ -170,10 +170,11 @@ export class AIService {
       // Utiliser le template de prompt existant
       const prompt = qcmPromptTemplate(text, title, summary, numberOfQuestions);
       
-      console.log("Generating QCM with prompt length:", prompt.length);
       
       // Générer le QCM avec Gemini
       const result = await this.geminiClient.generateJSON<QCMResponse>(prompt);
+      console.log("prompt :");
+      console.log(result);
       
       // Valider le résultat
       if (!result || !result.qcm || !Array.isArray(result.qcm) || result.qcm.length === 0) {

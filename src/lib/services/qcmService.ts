@@ -453,7 +453,7 @@ export class QCMService {
   async assignQuestionsToUsers(
     questions: Array<{ id: string }>, 
     users: Array<{ id: string; email: string }>,
-    questionsPerUser: number = 3
+    questionsPerUser: number = 10
   ): Promise<void> {
     const questionsForUsers = users.map((user) => {
       // Sélection aléatoire sans doublons pour le même utilisateur
