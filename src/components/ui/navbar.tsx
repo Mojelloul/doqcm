@@ -89,7 +89,7 @@ export function Navbar() {
                 alt="Logo"
                 width={32}
                 height={32}
-                className="w-8 h-8 bg-white rounded-lg shadow-sm mr-2"
+                className="w-8 h-8 rounded-lg shadow-sm mr-2"
               />
               DoQCM
             </Link>
@@ -113,7 +113,7 @@ export function Navbar() {
               alt="Logo"
               width={32}
               height={32}
-              className="w-8 h-8 bg-white rounded-lg shadow-sm mr-2"
+              className="w-8 h-8 rounded-lg shadow-sm mr-2"
             />
             DoQCM
           </Link>

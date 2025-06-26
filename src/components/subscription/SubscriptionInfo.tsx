@@ -121,8 +121,8 @@ export default function SubscriptionInfo({ userId }: SubscriptionInfoProps) {
             </ul>
           </div>
         </div>
-
-        {offers.length > 1 && (
+{/* hide offers */}
+        {/* {offers.length > 1 && (
           <div className="pt-4 border-t">
             <h4 className="text-sm font-medium mb-2">Offres disponibles</h4>
             <div className="space-y-2">
@@ -144,7 +144,7 @@ export default function SubscriptionInfo({ userId }: SubscriptionInfoProps) {
               ))}
             </div>
           </div>
-        )}
+        )} */}
       </CardContent>
     </Card>
   );

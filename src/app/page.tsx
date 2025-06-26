@@ -14,7 +14,7 @@ export default function Home() {
       <section className="py-20 px-2 sm:px-4">
         <div className="container mx-auto max-w-5xl">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center p-3 rounded-full mb-6">
+            {/* <div className="inline-flex items-center justify-center p-3 rounded-full mb-6">
               <Image
                 src="/logo.png"
                 alt="Logo DoQCM"
@@ -22,7 +22,7 @@ export default function Home() {
                 height={40}
                 className="bg-white rounded-full"
               />
-            </div>
+            </div> */}
             <h1 className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
               Plateforme professionnelle de <span className="text-blue-600 dark:text-blue-400">gestion de QCM</span>
             </h1>
