@@ -175,6 +175,25 @@ export default function DocumentQCMPage() {
       // Enregistrer le score
       await documentService.saveUserScore(documentId, currentUser.id, calculatedScore.percentage);
       
+      // Sauvegarder les réponses détaillées
+      const userAnswers = questions.map(question => {
+        const selectedChoiceId = selectedAnswers[question.id];
+        
+        return {
+          questionId: question.id,
+          choiceId: selectedChoiceId
+        };
+      });
+
+      // Insérer les réponses détaillées dans user_answers
+      try {
+        await qcmService.saveUserAnswers(currentUser.id, documentId, userAnswers);
+        console.log('Réponses détaillées sauvegardées avec succès');
+      } catch (answersError) {
+        console.error('Erreur lors de la sauvegarde des réponses détaillées:', answersError);
+        // On continue même si ça échoue, le score est déjà sauvegardé
+      }
+      
       // Mettre à jour l'état local
       setScore(calculatedScore);
       setShowResults(true);

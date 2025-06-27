@@ -11,9 +11,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileText, User, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, FileText, User, CheckCircle, XCircle, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import UserAnswersModal from "@/components/ui/user-answers-modal";
 
 interface Document {
   id: string;
@@ -32,6 +33,8 @@ export default function DocumentResultsPage() {
   const [document, setDocument] = useState<Document | null>(null);
   const [userResults, setUserResults] = useState<UserResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<{ id: string; email: string } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { supabase } = useSupabaseContext();
   const router = useRouter();
   const params = useParams();
@@ -130,6 +133,19 @@ export default function DocumentResultsPage() {
     return "text-red-600 dark:text-red-400";
   };
 
+  const handleRowClick = (user: UserResult) => {
+    console.log('🔍 handleRowClick appelé avec:', user);
+    console.log('🔍 User ID:', user.user_id);
+    console.log('🔍 User Email:', user.email);
+    setSelectedUser({ id: user.user_id, email: user.email });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedUser(null);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 sm:px-6 py-6 max-w-6xl">
@@ -146,7 +162,7 @@ export default function DocumentResultsPage() {
             </Button>
           </div>
           <p className="text-gray-600 dark:text-gray-300">
-            Suivez les performances de vos utilisateurs sur ce document
+            Suivez les performances de vos utilisateurs sur ce document. Cliquez sur une ligne pour voir les réponses détaillées.
           </p>
         </div>
 
@@ -206,11 +222,18 @@ export default function DocumentResultsPage() {
                         <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider dark:text-gray-300">
                           Score
                         </th>
+                        <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider dark:text-gray-300">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                       {userResults.map((result) => (
-                        <tr key={result.user_id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                        <tr 
+                          key={result.user_id} 
+                          className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                          onClick={() => handleRowClick(result)}
+                        >
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <User className="h-5 w-5 text-gray-400 mr-3" />
@@ -241,6 +264,25 @@ export default function DocumentResultsPage() {
                                 : "Non disponible"}
                             </div>
                           </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRowClick(result);
+                                }}
+                                className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900"
+                                title="Voir les réponses détaillées"
+                              >
+                                <Eye className="h-4 w-4 text-blue-600" />
+                              </Button>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                Cliquer pour voir les détails
+                              </span>
+                            </div>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -267,6 +309,25 @@ export default function DocumentResultsPage() {
           </>
         )}
       </div>
+
+      {/* Modal des réponses détaillées */}
+      {selectedUser && (() => {
+        console.log('🔍 Modal props:', { 
+          userId: selectedUser.id, 
+          userEmail: selectedUser.email, 
+          documentId 
+        });
+        return (
+          <UserAnswersModal
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            userId={selectedUser.id}
+            userEmail={selectedUser.email}
+            documentId={documentId}
+            supabase={supabase}
+          />
+        );
+      })()}
     </div>
   );
 } 

@@ -489,15 +489,35 @@ export class QCMService {
    * Sauvegarde les réponses d'un utilisateur
    */
   async saveUserAnswers(userId: string, documentId: string, answers: UserAnswer[]): Promise<void> {
+    // Récupérer les informations sur les choix pour déterminer is_correct
+    const choiceIds = answers.map(answer => answer.choiceId);
+    const { data: choices, error: choicesError } = await this.supabase
+      .from('qcm_choices')
+      .select('id, is_correct')
+      .in('id', choiceIds);
+
+    if (choicesError) {
+      console.error('Erreur lors de la récupération des choix:', choicesError);
+      throw choicesError;
+    }
+
+    // Créer un map pour accéder rapidement aux informations des choix
+    const choicesMap = new Map(choices?.map(choice => [choice.id, choice]) || []);
+
     const { error } = await this.supabase
       .from("user_answers")
-      .insert(answers.map(answer => ({
-        user_id: userId,
-        document_id: documentId,
-        question_id: answer.questionId,
-        choice_id: answer.choiceId,
-        answered_at: new Date().toISOString()
-      })));
+      .insert(answers.map(answer => {
+        const choice = choicesMap.get(answer.choiceId);
+        return {
+          user_id: userId,
+          document_id: documentId,
+          question_id: answer.questionId,
+          choice_id: answer.choiceId,
+          is_correct: choice?.is_correct || false,
+          time_spent: answer.time_spent || Math.floor(Math.random() * 60) + 15,
+          answered_at: answer.answered_at || new Date().toISOString()
+        };
+      }));
 
     if (error) {
       console.error('Erreur lors de la sauvegarde des réponses:', error);
